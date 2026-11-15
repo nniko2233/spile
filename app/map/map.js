@@ -323,6 +323,20 @@
     });
   }
 
+  /**
+   * Keep the canvas the size of its container. MapLibre tracks resizes itself, but
+   * it missed one made while the stage was still hidden behind the questionnaire:
+   * the map then stayed at the old window size, in the top left corner.
+   */
+  function fit() {
+    if (!map) return;
+    const el = map.getContainer(), c = map.getCanvas();
+    if (Math.abs(el.clientWidth - c.clientWidth) > 1 || Math.abs(el.clientHeight - c.clientHeight) > 1) map.resize();
+  }
+  let fitTimer = 0;
+  window.addEventListener('resize', () => { clearTimeout(fitTimer); fitTimer = setTimeout(fit, 150); });
+  bus.on(E.SCREEN_SHOW, fit);
+
   function init() {
     if (started) return;
     if (!window.maplibregl) { window.addEventListener('maplibre:ready', init, { once: true }); return; }
@@ -338,7 +352,7 @@
     get: () => map,
     isLoaded: () => loaded,
     onLoad(fn) { if (loaded) run(fn); else waiting.push(fn); },
-    cssLen, snapshot,
+    cssLen, snapshot, fit,
   };
 
   // The map starts loading behind the login screen, so screen 4 is a short wait.

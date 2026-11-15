@@ -634,6 +634,9 @@ tr.is-assigned td { animation: row-flash 1.6s ease; }
 /* ------------------------------------------------------ small windows */
 
 /* Last in the file so it wins over the per-screen rules above. */
+/* Under 1100 px the objective line is hidden: Save moves to the right end of the
+   header, clear of the threshold label that sits above the bars. */
+@media (max-width: 1100px) { .screen .plans-save { margin-left: auto; } }
 @media (max-width: 700px), (max-height: 620px) {
   .rq { width: 96vw; height: 96vh; border-radius: 20px; }
   .rq-body { padding: 16px 18px 14px; }
@@ -648,6 +651,9 @@ tr.is-assigned td { animation: row-flash 1.6s ease; }
   .role-line { display: none; }
   .popup { padding: 18px 18px 0; gap: 12px; } .popup-head h2 { font-size: 22px; }
   .wz-foot { margin: 0 -18px; padding: 10px 18px 14px; flex-wrap: wrap; gap: 10px; } .wz-checks { display: none; }
-  .plans-panel { padding: 14px 16px 12px; } .plans-head h1 { font-size: 20px; } .plans-axis { margin-bottom: 22px; }
+  /* Screen 7: a smaller map band and tighter rows, so all four plans fit. */
+  :root { --spile-plans-map-h: 34vh; }
+  .plans-panel { padding: 14px 16px 10px; } .plans-head h1 { font-size: 20px; }
+  .screen .plan-row { padding: 5px 0; } .plan-track { height: 22px; } .plan-total b { font-size: 19px; }
   .area-scroll { padding: 22px 20px 20px; } .area-head h1 { font-size: 28px; }
 }

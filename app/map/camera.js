@@ -215,6 +215,12 @@
     const cancel = () => { if (introState === 'running') skipIntro(); };
     ['mousedown', 'touchstart', 'wheel'].forEach(evt => map.getCanvas().addEventListener(evt, cancel, { passive: true }));
 
+    // The panels are sized from the window, so the padding follows a resize.
+    map.on('resize', () => {
+      const scr = SPILE.state && SPILE.state.screen;
+      if ((scr === S.AREA || scr === S.PLANS) && !map.isMoving()) map.setPadding(paddingFor(scr));
+    });
+
     const now = SPILE.state && SPILE.state.screen;
     if (introWanted || now === S.MAP) {
       introWanted = false;

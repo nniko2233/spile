@@ -628,3 +628,7 @@ Append-only. One line each: what was decided, why.
 - **2026-11-15** Niko: the action buttons must stay visible in a window of any
   size. The questionnaire card has a definite height and scrolls inside, pop-up
   footers are sticky, and one block of small-window rules ends main.css.
+- **2026-11-15** The map canvas is re-fitted on window resize and on every screen
+  change. MapLibre alone missed a resize made while the stage was hidden.
+- **2026-11-15** In windows under 620 px high the map band of screen 7 is 34vh,
+  not 42vh, so the four plan rows fit without scrolling.

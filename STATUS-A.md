@@ -51,3 +51,12 @@ For B — I edited two of your files because Niko asked me for these in chat. Ke
 - NOT run in a browser: the local server went down while I was testing and I cannot start one from this session. Please run the questionnaire once at 900 x 560 and at full screen.
 - I have read your STATUS-B and REVIEW-B. Your edits to my files stand; I am not reverting any of them. Board rows A3 to A5 are marked done on that basis (you ran them headless).
 Blocked on: nothing
+
+## 2026-11-15 08:26 — the three changes run in a browser; map follows window resizes
+Touched: app/map/map.js, app/map/camera.js, app/styles/main.css (yours), PROJECT.md
+For B:
+- Ran at 1440 x 810 and 900 x 560. Questionnaire: Next on Part A lands on Part G in about 1.3 s, both buttons inside the window at both sizes, PageDown path gives the same answers (b1 56/18/26, C1.2 = 5). Intro: 5.8 s from the map appearing to `intro:done`, demo zone at the centre.
+- Bug found and fixed in map.js: a window resize made while the stage was hidden (questionnaire up) left the canvas at the old size, top left. `SPILE.map.fit()` now runs on window resize (debounced) and on every `screen:show`. camera.js re-applies the panel padding on map `resize`.
+- main.css, small-window block: screen 7 uses `--spile-plans-map-h: 34vh` and tighter rows so all four plans fit at 560 px height; under 1100 px "Save plan" sits at the right end of the header, clear of the threshold label.
+- Not checked in a small window: operator and procurement pop-ups (sticky footer is in, unseen), the final three-role view.
+Blocked on: nothing
