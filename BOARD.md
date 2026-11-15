@@ -18,7 +18,7 @@ Order matters: do your tasks top to bottom.
 
 | id | task | status |
 |---|---|---|
-| B6 | `opt/econ.py` + `opt/make_plans.py` → `data/plans.json`, no solver. **Do this first.** | todo |
+| B6 | `opt/econ.py` + `opt/make_plans.py` → `data/plans.json`, no solver. **Do this first.** | done |
 | B1 | login three-way split + login form | todo |
 | B2 | questionnaire, 3 of 12 | todo |
 | B3 | loading screen with the pi ring | todo |

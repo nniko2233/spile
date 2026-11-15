@@ -134,7 +134,16 @@ maximum         6.20 * area_ha   0.32 * area_ha   0.13 * EAL
 annualized_cost = CAPEX * 0.0672 + OPEX + residual_risk
 acceptable      = residual_risk <= threshold
 optimum         = cheapest annualized_cost among the acceptable plans
+event_cost      = 18 k€/ha * 0.5 (share burnt in one event) * area_ha   k€
 ```
+
+`acceptable` and `optimum` are decided on unrounded values. Money in
+`plans.json` is rounded half-up: whole k€ for zones of 10 ha or more (only the
+50 ha reference scenario), 0.001 k€ for the real zones, which are all under
+6.2 ha. The reference scenario (50 ha, score 0.7) is written on zone 406,
+`params.demo_zone_id`; `make_plans.py` asserts the anchor table before writing.
+Over the 443 zones the optimum is: optimized 234, minimum 191, maximum 9,
+no action 9.
 
 Action list carried by each plan, for the panel:
 
@@ -291,3 +300,8 @@ Append-only. One line each: what was decided, why.
 - **2026-11-15** The data layer answers plan lookups from a formula fixture until
   `data/plans.json` loads, and whenever it cannot (file://), so the map never
   waits on the file.
+- **2026-11-15** Single wildfire event = 18 k€/ha on half the zone (9 k€/ha
+  effective), so the 50 ha scenario gives the 450 k€ of screen 6. Matches A's fixture.
+- **2026-11-15** plans.json rounding: whole k€ at 10 ha and above, 1 € below.
+  One decimal turned the threshold of the smallest zones into 0 and the map
+  divides by it.
