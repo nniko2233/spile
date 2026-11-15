@@ -285,3 +285,9 @@ Append-only. One line each: what was decided, why.
   the camera pads. Resizing a WebGL canvas mid-transition stutters on stage.
 - **2026-11-15** Only the Risk Manager column advances the flow; `role:picked`
   with another role is ignored by the shell.
+- **2026-11-15** The 50 ha reference scenario is pinned on zone 406. No real zone
+  is that large (max 6.15 ha); 406 is forest on a 31 degree slope with fire and
+  power risk under a 132 kV line. `params.demo_zone_id` in plans.json overrides it.
+- **2026-11-15** The data layer answers plan lookups from a formula fixture until
+  `data/plans.json` loads, and whenever it cannot (file://), so the map never
+  waits on the file.

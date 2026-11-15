@@ -8,7 +8,7 @@ Order matters: do your tasks top to bottom.
 | id | task | status |
 |---|---|---|
 | A1 | app shell: 7-screen state machine, transitions, no framework | done |
-| A2 | data layer over `bundle.js`: `getZones`, `getZone`, `getStats`, plan lookup helpers | todo |
+| A2 | data layer over `bundle.js`: `getZones`, `getZone`, `getStats`, plan lookup helpers | done |
 | A3 | 3D map screen: terrain, dark and minimal, compass only, zones extruded by class | todo |
 | A4 | camera intro (orbit then zoom) and click-to-select on zones | todo |
 | A5 | plan toggle: recolor zones from the residual risk in `plans.json` | todo |
