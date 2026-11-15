@@ -5,14 +5,15 @@
  * annualized cost of the works to the left, residual risk to the right. One
  * vertical line crosses the risk side of every bar: the acceptance threshold.
  * That line is the point of the screen. One control: the map toggle on a row.
- * No budget slider.
+ * One action: Save plan, which puts the pin on the map (ring step 1) and hands
+ * over to the regional operator. No budget slider.
  */
 (() => {
   'use strict';
   const { h, k } = SPILE.ui, E = SPILE.EVENTS, bus = SPILE.bus;
   const SHIMMER_MS = 1200;
 
-  let root, zoneId = null, selected = null, timers = [];
+  let root, zoneId = null, selected = null, timers = [], saved = false, judged = false, saveBtn = null, zplans = null;
   const later = (fn, ms) => timers.push(setTimeout(fn, ms));
   const clearTimers = () => { timers.forEach(clearTimeout); timers = []; };
 
@@ -30,15 +31,36 @@
       r.classList.toggle('is-on', on);
       r.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
+    syncSave();
+  }
+
+  const optimumId = () => { const p = zplans && zplans.plans.find(p => p.optimum); return p ? p.id : null; };
+  /** The plan Save would keep: the one shown on the map, else the optimum. */
+  const candidate = () => zplans && zplans.plans.find(p => p.id === (selected || optimumId()));
+
+  function syncSave() {
+    if (!saveBtn) return;
+    const p = candidate(), ok = judged && !saved && p && p.acceptable;
+    saveBtn.disabled = !ok;
+    saveBtn.querySelector('span').textContent = saved ? 'Saved' : p && !p.acceptable ? 'Not acceptable' : 'Save plan';
+  }
+
+  function save() {
+    const p = candidate();
+    if (saved || !judged || !p || !p.acceptable) return;
+    if (selected !== p.id) toggle(p.id);
+    saved = true;
+    syncSave();
+    bus.emit(E.PLAN_SAVED, { zoneId, planId: p.id });
   }
 
   function render() {
     clearTimers();
-    selected = null;
+    selected = null; saved = false; judged = false;
     const zone = SPILE.state.zone;
     if (!zone) return;
     zoneId = zone.id;
-    const zp = SPILE.data.getPlans(zoneId);
+    const zp = zplans = SPILE.data.getPlans(zoneId);
     if (!zp) return;
 
     // Cost of the works per year = annualized total minus the residual risk.
@@ -57,7 +79,8 @@
           h('p.eyebrow', { text: `Area ${zoneId} · ${k(zp.area_ha)} ha` }),
           h('h1', { text: 'Management plans' })),
         h('p.objective', null, h('b', { text: 'Objective ' }),
-          'minimize annualized cost subject to residual risk below the acceptance threshold.')),
+          'minimize annualized cost subject to residual risk below the acceptance threshold.'),
+        saveBtn = h('button.btn.btn-primary.plans-save', { type: 'button', disabled: true, onclick: save }, h('span', { text: 'Save plan' }))),
 
       h('div.plans-body', null,
         h('div.plans-axis', null,
@@ -92,11 +115,18 @@
     root.replaceChildren(panel);
     later(() => panel.classList.add('is-solved'), SHIMMER_MS);          // bars grow
     later(() => panel.classList.add('is-threshold'), SHIMMER_MS + 900); // the line lands
-    later(() => panel.classList.add('is-judged'), SHIMMER_MS + 1700);   // rows that cross it grey out
+    later(() => { panel.classList.add('is-judged'); judged = true; syncSave(); }, SHIMMER_MS + 1700);   // rows that cross it grey out
   }
 
   SPILE.ui.screen('plans', {
-    init(el) { root = h('div.plans'); el.append(root); },
+    init(el) {
+      root = h('div.plans'); el.append(root);
+      // Presenter key: first press shows the optimum on the map, second saves it.
+      bus.on(E.PRESENTER_NEXT, p => {
+        if (!p || p.screen !== 'plans' || !judged) return;
+        if (!selected && optimumId()) toggle(optimumId()); else save();
+      });
+    },
     show() { render(); },
     hide() {
       clearTimers();

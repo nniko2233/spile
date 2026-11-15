@@ -29,10 +29,13 @@
   }
   .screen.is-active { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity .7s ease; }
   /* Screens 5-7 float over the map: the section lets clicks through, its children do not. */
-  .screen[data-screen="map"], .screen[data-screen="area"], .screen[data-screen="plans"] { pointer-events: none; }
+  .screen[data-screen="map"], .screen[data-screen="area"], .screen[data-screen="plans"],
+  .screen[data-screen="operator"], .screen[data-screen="procurement"] { pointer-events: none; }
   .screen[data-screen="map"].is-active > *,
   .screen[data-screen="area"].is-active > *,
-  .screen[data-screen="plans"].is-active > * { pointer-events: auto; }
+  .screen[data-screen="plans"].is-active > *,
+  .screen[data-screen="operator"].is-active > *,
+  .screen[data-screen="procurement"].is-active > * { pointer-events: auto; }
 
   /* Compass: the only thing on the map. */
   #compass {
@@ -88,6 +91,9 @@
   <section class="screen" id="screen-map" data-screen="map"></section>
   <section class="screen" id="screen-area" data-screen="area"></section>
   <section class="screen" id="screen-plans" data-screen="plans"></section>
+  <section class="screen" id="screen-operator" data-screen="operator"></section>
+  <section class="screen" id="screen-procurement" data-screen="procurement"></section>
+  <section class="screen" id="screen-final" data-screen="final"></section>
 </main>
 
 <!-- MapLibre loads async so a slow CDN never blocks the login screen. -->

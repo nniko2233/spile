@@ -91,6 +91,9 @@
     map.on('mouseout', () => setHover(null));
 
     if (revealPending != null) { const d = revealPending; revealPending = null; revealZones(d); }
+    // A job seeded before the map existed (?screen=operator) still gets its pin.
+    const job = SPILE.state && SPILE.state.job;
+    if (job && job.zone) setPin(job.zone.id, job.step);
   }
 
   /* ------------------------------------------------------------- reveal */
@@ -266,51 +269,68 @@
 
   /**
    * A pin stands only on a zone with an active plan, request or job. The pin is
-   * neutral: its ring shows progress in three steps (Plan, Request, Procurement)
-   * and never carries a risk colour. This build only reaches step 1.
+   * neutral: its ring shows progress in three steps (SPILE.PIN_STEPS) and never
+   * carries a risk colour. Steps: 1 plan saved, 2 cutting request filed,
+   * 3 job assigned (third segment a third full: done, verified and paid still to come).
    */
-  const PIN_STEPS = ['Plan', 'Request', 'Procure'];
-  let pin = null;
+  const PIN_LABEL = ['Plan', 'Request', 'Job'];
+  const PIN_FILL = [0, 1, 2, 2 + 1 / 3];
+  let pin = null, pinZone = null, pinStep = 0;
 
-  function pinElement(step) {
-    const arc = i => {
+  /** The pin as an SVG string. Segments reached since `prevStep` draw themselves in. */
+  function pinSVG(step, prevStep = step) {
+    const fill = PIN_FILL[step] || 0, before = PIN_FILL[prevStep] || 0, r = 17;
+    const arc = (i, share, cls) => {
       // Three 100 degree arcs around the head of the pin, 20 degree gaps.
-      const a0 = (-90 + i * 120 + 10) * Math.PI / 180, a1 = (-90 + i * 120 + 110) * Math.PI / 180, r = 17;
+      const a0 = (-90 + i * 120 + 10) * Math.PI / 180, a1 = (-90 + i * 120 + 10 + 100 * share) * Math.PI / 180;
       const p = a => (23 + r * Math.cos(a)).toFixed(2) + ' ' + (23 + r * Math.sin(a)).toFixed(2);
-      return '<path class="pin-seg' + (i < step ? ' is-done' : '') + '" d="M' + p(a0) + ' A' + r + ' ' + r + ' 0 0 1 ' + p(a1) + '"/>';
+      return '<path class="pin-seg ' + cls + '" pathLength="1" d="M' + p(a0) + ' A' + r + ' ' + r + ' 0 0 1 ' + p(a1) + '"/>';
     };
-    const el = document.createElement('div');
-    el.className = 'pin';
-    el.innerHTML = '<svg viewBox="0 0 46 58" aria-hidden="true">' +
-      '<path class="pin-body" d="M23 57 L11 38 A21 21 0 1 1 35 38 Z"/>' +
-      arc(0) + arc(1) + arc(2) +
-      '<text x="23" y="26">' + PIN_STEPS[step - 1] + '</text></svg>';
-    return el;
+    let segs = '';
+    for (let i = 0; i < 3; i++) {
+      segs += arc(i, 1, '');
+      const share = Math.max(0, Math.min(1, fill - i));
+      if (share > 0) segs += arc(i, share, 'is-done' + (fill > before && before < i + share ? ' is-new' : ''));
+    }
+    return '<svg viewBox="0 0 46 58" aria-hidden="true">' +
+      '<path class="pin-body" d="M23 57 L11 38 A21 21 0 1 1 35 38 Z"/>' + segs +
+      '<text x="23" y="26">' + (PIN_LABEL[step - 1] || '') + '</text></svg>';
   }
 
   function setPin(zoneId, step) {
+    const prev = zoneId === pinZone ? pinStep : 0;
     if (pin) { pin.remove(); pin = null; }
+    pinZone = null; pinStep = 0;
     const zone = zoneId != null && D.getZone(zoneId);
-    if (!zone || !map || !window.maplibregl) return;
-    pin = new maplibregl.Marker({ element: pinElement(step), anchor: 'bottom', offset: [0, -26], opacity: '1', opacityWhenCovered: '1' })
+    if (!zone || !step || !map || !window.maplibregl) return;
+    const el = document.createElement('button');
+    el.type = 'button'; el.className = 'pin'; el.setAttribute('aria-label', 'Open the job on this area');
+    el.innerHTML = pinSVG(step, prev);
+    el.addEventListener('click', e => { e.stopPropagation(); bus.emit(E.PIN_CLICKED, { zoneId: zone.id }); });
+    pin = new maplibregl.Marker({ element: el, anchor: 'bottom', offset: [0, -26], opacity: '1', opacityWhenCovered: '1' })
       .setLngLat([zone.lon, zone.lat]).addTo(map);
+    pinZone = zone.id; pinStep = step;
   }
 
-  bus.on(E.PLAN_SELECTED, p => {
-    if (!p || !p.planId) return;
-    showPlan(p.planId, p.zoneId);
-    if (p.planId === 'no_action') setPin(null); else setPin(p.zoneId != null ? p.zoneId : selectedId, 1);
-  });
-  bus.on(E.PLAN_CLEARED, () => { showPlan(null, selectedId); setPin(null); });
+  bus.on(E.PLAN_SELECTED, p => { if (p && p.planId) showPlan(p.planId, p.zoneId); });
+  bus.on(E.PLAN_CLEARED, () => showPlan(null, selectedId));
+
+  // The pin follows the job, not the plan toggle.
+  const jobZone = p => (p && p.zoneId != null ? p.zoneId : (SPILE.state.job && SPILE.state.job.zone ? SPILE.state.job.zone.id : selectedId));
+  bus.on(E.PLAN_SAVED, p => setPin(jobZone(p), 1));
+  bus.on(E.REQUEST_SAVED, p => setPin(jobZone(p), 2));
+  bus.on(E.JOB_ASSIGNED, p => setPin(jobZone(p), 3));
+
   bus.on(E.PLAN_HOVER, p => {
     if (!p) return;
     const zoneId = p.zoneId != null ? p.zoneId : (previewZone != null ? previewZone : selectedId);
     previewPlan(zoneId, p.planId || null);
   });
 
-  // Back on the bare map: nothing selected, class colours again.
+  // Back on the bare map, and for the operator and procurement: nothing selected,
+  // class colours again. The work is not done yet, so the risk colour has not changed.
   bus.on(E.SCREEN_SHOW, p => {
-    if (p.screen !== S.MAP) return;
+    if (p.screen !== S.MAP && p.screen !== S.OPERATOR && p.screen !== S.PROCUREMENT && p.screen !== S.FINAL) return;
     clearSelection();
     if (committedPlan) showPlan(null, null);
   });
@@ -319,7 +339,8 @@
   bus.on('data:plans', () => { if (committedPlan) showPlan(committedPlan, selectedId, { instant: true }); });
 
   Object.assign(SPILE.map, {
-    selectZone, clearSelection, revealZones, showPlan,
+    selectZone, clearSelection, revealZones, showPlan, setPin, pinSVG,
+    pinElement: () => (pin ? pin.getElement() : null),
     selectedZoneId: () => selectedId,
     shownPlan: () => committedPlan,
   });

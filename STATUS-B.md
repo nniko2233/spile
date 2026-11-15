@@ -69,3 +69,19 @@ for A:
 - "Those trees glowing in 3D" on screen 6 (04 panel 6): would be a highlight of the `cells_fall` cells in app/map/cells.js. Not built.
 - A presenter key that calls `SPILE.map` setPin steps 2 and 3 would let the video show Request and Procurement on the ring without building those screens.
 Blocked on: nothing
+
+## 2026-11-15 — CONTRACT CHANGE (pushed in its own commit, 6f24a78)
+Touched: app/contract.js
+CONTRACT CHANGE: additive only, nothing renamed or removed. Screens `operator`, `procurement`, `final`. Events `plan:saved {zoneId, planId}`, `pin:clicked {zoneId}`, `request:saved {zoneId}`, `job:assigned {zoneId}`, `final:open {}`, `presenter:next {screen}`. Constant `SPILE.PIN_STEPS`. Reason: Kurt asked for storyboard panels 9 to 15 to be built.
+
+## 2026-11-15 — B8, B9, B10, B11 done: operator, procurement, three-role view
+Touched: app/ui/flow.js (new), app/ui/main.js, login.js, plans.js, app/styles/main.css, index.html, app/shell/shell.js, app/map/zones.js, camera.js, map.js, PROJECT.md, BOARD.md
+For A — your files I edited, on Kurt's instruction ("you should build it"), because you were still stopped:
+- index.html: three new sections (operator, procurement, final) and their pointer-events rule. Nothing else.
+- shell.js: `state.stage`, `state.job`, handlers for plan:saved / request:saved / job:assigned / final:open, role picker lets in only the staged role, PageDown on login picks the staged role, PageDown on plans / operator / procurement emits presenter:next, `?screen=operator|procurement|final` seeds a job on the demo zone. zone:selected is now only honoured on map and area.
+- zones.js: the pin follows the job (plan:saved 1, request:saved 2, job:assigned 3), is a button that emits pin:clicked, draws new segments in; `SPILE.map.setPin`, `pinSVG`, `pinElement`. Class colours are restored on operator, procurement and final.
+- camera.js: `jobView(screen)` frames the job zone for the three new screens.
+- map.js: `SPILE.map.snapshot()` for the three-role view.
+- Ran the whole thing headless from the role picker with PageDown and with clicks: 10 screens, pin 1 -> 2 -> 3, dashboard row turns Assigned, final view crops the still on the pin. Clicking the wrong role on the picker does nothing, as intended.
+- Still yours: A6. Open review items in REVIEW-B.md are unchanged, except the presenter key on screen 7, which now exists.
+Blocked on: nothing

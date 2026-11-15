@@ -69,10 +69,11 @@
 
   bus.on(E.SCREEN_SHOW, p => activate(p.screen, p));
 
-  // The role drives the accent colour of everything after the login split.
-  bus.on(E.ROLE_PICKED, p => {
-    const role = (p && p.role) || SPILE.ROLES.RISK_MANAGER;
-    if (role === SPILE.ROLES.RISK_MANAGER) document.body.dataset.role = role;
+  // One accent per role: the role whose turn it is colours every screen it works on.
+  const SCREEN_ROLE = { operator: SPILE.ROLES.OPERATOR, procurement: SPILE.ROLES.PROCUREMENT, final: SPILE.ROLES.PROCUREMENT };
+  bus.on(E.SCREEN_SHOW, p => {
+    const stage = (SPILE.state && SPILE.state.stage) || SPILE.ROLES.RISK_MANAGER;
+    document.body.dataset.role = SCREEN_ROLE[p.screen] || (p.screen === 'login' ? stage : SPILE.ROLES.RISK_MANAGER);
   });
   document.body.dataset.role = SPILE.ROLES.RISK_MANAGER;
 
@@ -81,7 +82,7 @@
   if (host) host.append(h('div.demo-data', { text: 'Demo data' }));
 
   const base = (document.currentScript && document.currentScript.src.replace(/[^/]*$/, '')) || 'app/ui/';
-  ['login.js', 'questionnaire.js', 'loading.js', 'area.js', 'plans.js'].forEach(f => {
+  ['login.js', 'questionnaire.js', 'loading.js', 'area.js', 'plans.js', 'flow.js'].forEach(f => {
     const s = document.createElement('script');
     s.src = base + f; s.async = false;
     document.head.append(s);

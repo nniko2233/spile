@@ -25,6 +25,10 @@ Order matters: do your tasks top to bottom.
 | B4 | area panel, four blocks, fed by the data layer | done |
 | B5 | plans panel: swipe-down, split bars, threshold line, greyed rows, shimmer | done |
 | B7 | visual pass: typography, palette, motion, so it reads as cinematic | done |
+| B8 | contract + shell: job cycle, role stages (plan saved, request saved, job assigned) | done |
+| B9 | screen 8, operator: pin, "Request cutting job?", cutting request pop-up | done |
+| B10 | screen 9, procurement: "Procure resources?", assignment pop-up, dashboard | done |
+| B11 | screen 10, three roles, one pin | done |
 
 ## Checkpoints
 

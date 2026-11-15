@@ -133,9 +133,21 @@
       { padding: paddingFor(screen), duration: 1700, curve: 1.2, essential: true }));
   }
 
+  /** Operator, procurement and final: the same place, seen from the same side, a step back. */
+  function jobView(screen) {
+    const job = SPILE.state && SPILE.state.job;
+    if (!job || !job.zone) return;
+    if (introState !== 'done') skipIntro();
+    token++;
+    const bottom = screen === S.PROCUREMENT ? Math.round(window.innerHeight * 0.34) : 0;
+    map.flyTo(Object.assign(lookAt(job.zone, { zoom: screen === S.FINAL ? 14.2 : 13.7, pitch: 56, bearing: -34 }),
+      { padding: Object.assign({}, NO_PAD, { bottom }), duration: 1600, curve: 1.2, essential: true }));
+  }
+
   function onScreen(p) {
     if (!map) { if (p.screen === S.MAP && p.prev === S.LOADING) introWanted = true; return; }
     const zone = SPILE.state && SPILE.state.zone;
+    if (p.screen === S.OPERATOR || p.screen === S.PROCUREMENT || p.screen === S.FINAL) { jobView(p.screen); return; }
 
     if (p.screen === S.MAP) {
       if (introState === 'idle') {
@@ -184,6 +196,9 @@
       if (introState === 'idle') playIntro();
     } else if (now === S.AREA || now === S.PLANS) {
       finishIntro();
+    } else if (now === S.OPERATOR || now === S.PROCUREMENT || now === S.FINAL) {
+      finishIntro();
+      jobView(now);
     }
   });
 })();

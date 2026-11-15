@@ -4,7 +4,7 @@
   const { h } = SPILE.ui, E = SPILE.EVENTS, bus = SPILE.bus, R = SPILE.ROLES;
 
   const ROLES = [
-    { id: R.RISK_MANAGER, name: 'Risk Manager', line: 'Where the risk is, what it costs, which plan clears the threshold', live: true },
+    { id: R.RISK_MANAGER, name: 'Risk Manager', line: 'Where the risk is, what it costs, which plan clears the threshold' },
     { id: R.OPERATOR, name: 'Regional Operator', sub: 'Grid utility', line: 'Which line segments are exposed, what to cut and when' },
     { id: R.PROCUREMENT, name: 'Procurement', line: 'What the works cost, and what inaction costs instead' },
   ];
@@ -22,8 +22,18 @@
             h('span.role-name', { text: r.name }),
             r.sub && h('span.role-sub', { text: r.sub }),
             h('span.role-line', { text: r.line }),
-            h('span.role-go', { text: r.live ? 'Sign in' : 'Not in this demo' })))),
+            h('span.role-go')))),
         h('p.caption.login-caption', { text: SPILE.ui.SLOGAN }));
+    },
+    // The role whose turn it is stands out; the ones before it are done.
+    show(el) {
+      const order = ROLES.map(r => r.id), now = order.indexOf((SPILE.state && SPILE.state.stage) || R.RISK_MANAGER);
+      el.querySelectorAll('.role').forEach((b, i) => {
+        b.classList.toggle('is-next', i === now);
+        b.classList.toggle('is-done', i < now);
+        b.classList.toggle('is-later', i > now);
+        b.querySelector('.role-go').textContent = i === now ? 'Sign in' : i < now ? 'Done' : 'Next';
+      });
     },
   });
 

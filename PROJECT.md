@@ -22,15 +22,16 @@ Three users, picked on the login screen:
 | Regional Operator (grid utility) | Which line segments are exposed, what to cut and when |
 | Procurement | What the works cost, and what inaction costs instead |
 
-The demo logs in as **Risk Manager**. The other two columns are present but not
-implemented.
+The demo logs in as **Risk Manager** and runs the full risk flow (screens 1 to 7).
+The other two roles then take one turn each on the same job (screens 8 to 10):
+their screens are scripted demo data, not a working back office.
 
 Slogan, wherever one is shown: **For Reliable Infrastructure**. Not "Cut the
 trees, not the power".
 
 UI specs: docs/specs/01-04 (reference only; PROJECT.md wins on any conflict)
 
-## The demo, 7 screens
+## The demo, 10 screens
 
 Authoritative spec. Neither agent reinterprets it alone.
 
@@ -147,6 +148,12 @@ One control only. **No budget slider.** A **map toggle**: selecting a plan
 recolors the map zones with that plan's residual risk. Red turning green is the
 key moment of the demo.
 
+One action besides the control: **Save plan**, top right of the panel. It keeps
+the plan shown on the map (the optimum if none is toggled), is disabled for a
+plan that is not acceptable, puts the pin on the zone with ring step 1 filling,
+and after 2.4 s hands over to the Regional Operator on the role picker. The
+zones go back to their risk colours: nothing has been cut yet.
+
 The objective is printed in the UI, one line:
 *minimize annualized cost subject to residual risk below the acceptance threshold.*
 
@@ -160,6 +167,37 @@ For the 50 ha demo zone the numbers must come out exactly like this:
 | Maximum plan (undergrounding) | 310 k€ | 6 k€/yr | 43 k€/yr | acceptable, dearer |
 
 Acceptance threshold for that zone: 15 k€/yr.
+
+### 8. Regional Operator: cutting request
+The role picker returns with the Regional Operator card lit and the Risk Manager
+marked done; only the role whose turn it is gets in, and there is no second
+sign-in form. Then the same map, the same place, one pin whose ring shows Plan
+done, pulsing because it waits for this user. Tap the pin: **Request cutting
+job?** Tap that: the cutting request pop-up, the eight steps of
+`docs/specs/02` as eight tiles (Scope, Field check, Work needed, Timing, Safety,
+Access, Land and permits, Hand-over), three answers each, filling themselves in
+at 0.3 s per tile. **Save request**: the second ring segment fills, 2.4 s later
+the role picker returns for Procurement. No costs on this form: the operator
+gives quantities and constraints.
+
+### 9. Procurement: assignment and dashboard
+Same map, same pin, two segments full. Tap the pin: **Procure resources?**, then
+the assignment pop-up, the four steps of `docs/specs/03` (Contractor, Contract
+and price, Schedule, Documents). **Send work order**: the third segment fills by
+a third, and the dashboard rises from the bottom, one row per request, where the
+row of this job turns from *In procurement* to **Assigned**. Button **All three
+roles** opens screen 10.
+
+### 10. Three roles, one pin
+Three thin views side by side, one per role, each with its accent, the same
+still of the map cropped on the same pin, and what that role sees of the job.
+Under each: Assigned (done), Verified and Paid (faded, still to come). Caption:
+*One pin, three roles*.
+
+The job is the same everywhere, invented, and labelled demo data: CR-0142, VCO,
+15 kV MV line, 146 trees to fell and 62 to prune over 3.2 ha, window 24 Nov to
+15 Dec, line outage 1 to 3 Dec, Forestry firm A, estimate 18,400 €, order
+17,900 €, PO-4500123. The 146 is the fall-in reach count of screen 6.
 
 ### Storyboard and the demo video
 
@@ -177,16 +215,12 @@ or a control, this file wins.
 | 5 Risk map | 5 3D map | yes | zones (not corridors) in red and amber; block shown tilted after a flat first beat |
 | 6 Area detail | 6 Area panel | yes | the four blocks of this file, not "area / flood / fire / fault"; fall-in reach count comes from the data (146), not 14 |
 | 7 Optimiser running | 7, the 1.2 s shimmer | yes | no "within budget": the constraint is the acceptance threshold |
-| 8 Plan result | 7, the bars | yes | bars and threshold line instead of "actions, cost, months"; toggling a plan on is the "save" and fills ring step 1 |
-| 9-11 Operator: map, pin, cutting request | none | no | spec 02 describes it |
-| 12-14 Procurement: map, assignment, dashboard | none | no | spec 03 describes it |
-| 15 Split view of the three roles | none | no | |
-
-Panels 9 to 15 belong to the two roles this build does not implement. In the
-video they are narrated over the built screens or mocked in the edit; they add
-no screen to the 7 above unless Kurt and Niko decide otherwise. The pin already
-carries the three-step ring, so steps 2 and 3 can be shown by calling
-`setPin(zoneId, 2)` / `setPin(zoneId, 3)` in `app/map/zones.js`.
+| 8 Plan result | 7, the bars | yes | bars and threshold line instead of "actions, cost, months"; Save plan fills ring step 1 |
+| 9 Role picker, operator | 1 again, operator lit | yes | |
+| 10-11 Operator map, cutting request | 8 | yes | eight tiles, scripted values |
+| 12 Role picker, procurement | 1 again, procurement lit | yes | |
+| 13-14 Procurement map, assignment, dashboard | 9 | yes | four tiles, scripted values; three sample rows |
+| 15 Split view of the three roles | 10 | yes | one still of the map shown three times, not three live maps |
 
 Not taken from the specs, on purpose: any budget field or slider (01 Part F2,
 04 panel 7); the spec optimiser objective "most risk removed within budget"
@@ -291,7 +325,15 @@ login --role:picked--> auth --auth:done--> questionnaire --survey:done-->
 loading --(map:ready, held at least 4.2 s, at most 16 s)--> map
 map --zone:selected--> area --plans:open--> plans
 zone:cleared returns to map; screen:back steps plans -> area -> map.
+
+plans --plan:saved, 2.4 s--> login (stage operator) --role:picked--> operator
+operator --request:saved, 2.4 s--> login (stage procurement) --role:picked--> procurement
+procurement --job:assigned, then final:open--> final
 ```
+
+`SPILE.state.stage` is the role whose turn it is; the role picker ignores the
+others. `SPILE.state.job` is `{zone, planId, step}` from the moment a plan is
+saved (step 1 Plan, 2 Request, 3 Procurement) and the pin follows it.
 
 `index.html` loads exactly two UI files: `app/styles/main.css` and
 `app/ui/main.js`. Everything else the UI needs is loaded from those two.
@@ -302,8 +344,11 @@ width the area panel covers on the right) and `--spile-plans-map-h` (42vh, the
 map band left visible at the top of screen 7). The map never resizes: the panels
 cover it and the camera pads itself to keep the zone in the visible part.
 
-Presenter safety net: `PageDown` advances one screen, `PageUp` and `Esc` step
-back, whatever the UI is doing. `?screen=<name>` jumps to a screen and `?dev`
+Presenter safety net: `PageDown` advances one beat, `PageUp` and `Esc` step
+back, whatever the UI is doing. The whole demo can be driven with `PageDown`
+alone, 17 presses from the role picker to the three-role view: on screen 7 the
+first press shows the optimum on the map and the second saves it; on screens 8
+and 9 the presses are question, pop-up, save (then, on 9, the three-role view). `?screen=<name>` jumps to a screen and `?dev`
 labels empty screens; both are development only.
 
 ## Data
@@ -428,3 +473,16 @@ Append-only. One line each: what was decided, why.
   table in this file records how its 15 panels map to the 7 screens and which
   spec items are deliberately not taken.
 - **2026-11-15** Captions kept to five words or fewer (spec 04 clean-screen rule).
+- **2026-11-15** (Kurt) Storyboard panels 9 to 15 are built as screens 8, 9, 10:
+  scripted, one job, demo data. Contract gained three screens and six events.
+- **2026-11-15** Screen 7 gained one action, Save plan. The pin now appears on
+  save, not on the map toggle: a toggle is a preview, a saved plan is a job.
+- **2026-11-15** After a save the zones return to their risk colours and stay
+  that way for the operator and procurement. Colour means risk, and the risk has
+  not changed until the work is verified.
+- **2026-11-15** No second sign-in for the operator and procurement: the role
+  picker is the hand-over. A sign-in form twice more would cost the video 3 s.
+- **2026-11-15** Screen 10 shows one still of the map three times rather than
+  three live maps: three WebGL contexts with terrain would stutter on a laptop.
+- **2026-11-15** Shell and index.html (A's files) extended by B for the above,
+  on Kurt's instruction, A still stopped.

@@ -14,13 +14,20 @@
  *   login --ROLE_PICKED--> auth --AUTH_DONE--> questionnaire --SURVEY_DONE-->
  *   loading --(MAP_READY and minimum hold)--> map --ZONE_SELECTED--> area
  *   --PLANS_OPEN--> plans.   ZONE_CLEARED returns to map, SCREEN_BACK steps back.
+ *
+ * Then the job cycle (added by Agent B on Kurt's instruction, storyboard 9-15).
+ * `state.stage` is the role whose turn it is; the role picker only lets that one in.
+ *   plans --PLAN_SAVED--> login (stage operator) --ROLE_PICKED--> operator
+ *   --REQUEST_SAVED--> login (stage procurement) --ROLE_PICKED--> procurement
+ *   --JOB_ASSIGNED, FINAL_OPEN--> final
  */
 (() => {
   'use strict';
-  const S = SPILE.SCREENS, E = SPILE.EVENTS, bus = SPILE.bus;
+  const S = SPILE.SCREENS, E = SPILE.EVENTS, R = SPILE.ROLES, bus = SPILE.bus;
 
-  const ORDER = [S.LOGIN, S.AUTH, S.QUESTIONNAIRE, S.LOADING, S.MAP, S.AREA, S.PLANS];
-  const MAP_SCREENS = new Set([S.MAP, S.AREA, S.PLANS]);
+  const ORDER = [S.LOGIN, S.AUTH, S.QUESTIONNAIRE, S.LOADING, S.MAP, S.AREA, S.PLANS, S.OPERATOR, S.PROCUREMENT, S.FINAL];
+  const MAP_SCREENS = new Set([S.MAP, S.AREA, S.PLANS, S.OPERATOR, S.PROCUREMENT, S.FINAL]);
+  const HANDOFF_MS = 2400;       // time to watch the ring segment fill before the role picker returns
 
   const LOADING_MIN_MS = 4200;   // long enough to read the pi ring
   const LOADING_MAX_MS = 16000;  // never strand the demo on a slow network
@@ -32,14 +39,17 @@
   const state = SPILE.state = {
     screen: null, prev: null, role: null, answers: null, zone: null,
     mapReady: false, introDone: false,
+    stage: R.RISK_MANAGER,   // the role whose turn it is on the role picker
+    job: null,               // {zone, planId, step} once a plan is saved; step 1 Plan, 2 Request, 3 Procurement
   };
 
   const sections = new Map();
-  let loadingTimer = null, loadingSince = 0;
+  let loadingTimer = null, loadingSince = 0, handoffTimer = null;
 
   function show(screen) {
     if (!ORDER.includes(screen) || screen === state.screen) return;
     clearTimeout(loadingTimer);
+    clearTimeout(handoffTimer);
 
     state.prev = state.screen;
     state.screen = screen;
@@ -77,11 +87,24 @@
     else if (from === S.AREA) show(S.MAP);
     else if (from === S.QUESTIONNAIRE) show(S.AUTH);
     else if (from === S.AUTH) show(S.LOGIN);
+    else if (from === S.OPERATOR || from === S.PROCUREMENT) show(S.LOGIN);
+    else if (from === S.FINAL) show(S.PROCUREMENT);
+  }
+
+  /** The role picker comes back for the next role once the ring has been seen filling. */
+  function handoff(stage) {
+    state.stage = stage;
+    clearTimeout(handoffTimer);
+    handoffTimer = setTimeout(() => show(S.LOGIN), HANDOFF_MS);
   }
 
   /** Presenter safety net and dev stepping: move along the flow without the UI. */
   function next() {
     const from = state.screen;
+    if (from === S.LOGIN) { bus.emit(E.ROLE_PICKED, { role: state.stage }); return; }
+    // On these the UI knows what the next beat is (toggle the plan, open the pop-up, save).
+    if (from === S.PLANS || from === S.OPERATOR || from === S.PROCUREMENT) { bus.emit(E.PRESENTER_NEXT, { screen: from }); return; }
+    if (from === S.FINAL) return;
     if (from === S.MAP || from === S.AREA && !state.zone) {
       // The only way into the area screen is a selected zone: pick the demo one.
       if (SPILE.map && SPILE.map.selectZone) SPILE.map.selectZone(SPILE.data.getDemoZoneId());
@@ -97,11 +120,26 @@
   bus.on(E.ROLE_PICKED, p => {
     if (state.screen !== S.LOGIN) return;
     const role = (p && p.role) || p;
-    // Only the Risk Manager column is implemented in this build.
-    if (role && role !== SPILE.ROLES.RISK_MANAGER) return;
-    state.role = SPILE.ROLES.RISK_MANAGER;
-    show(S.AUTH);
+    // Only the role whose turn it is gets in.
+    if (role !== state.stage) return;
+    state.role = role;
+    if (role === R.RISK_MANAGER) show(S.AUTH);
+    else if (role === R.OPERATOR && state.job) show(S.OPERATOR);
+    else if (role === R.PROCUREMENT && state.job) show(S.PROCUREMENT);
   });
+
+  bus.on(E.PLAN_SAVED, p => {
+    if (state.screen !== S.PLANS || !state.zone) return;
+    state.job = { zone: state.zone, planId: (p && p.planId) || null, step: 1 };
+    handoff(R.OPERATOR);
+  });
+  bus.on(E.REQUEST_SAVED, () => {
+    if (state.screen !== S.OPERATOR || !state.job) return;
+    state.job.step = 2;
+    handoff(R.PROCUREMENT);
+  });
+  bus.on(E.JOB_ASSIGNED, () => { if (state.screen === S.PROCUREMENT && state.job) state.job.step = 3; });
+  bus.on(E.FINAL_OPEN, () => { if (state.screen === S.PROCUREMENT && state.job && state.job.step >= 3) show(S.FINAL); });
 
   bus.on(E.AUTH_DONE, () => { if (state.screen === S.AUTH) show(S.QUESTIONNAIRE); });
 
@@ -115,7 +153,7 @@
   bus.on(E.INTRO_DONE, () => { state.introDone = true; });
 
   bus.on(E.ZONE_SELECTED, p => {
-    if (!MAP_SCREENS.has(state.screen) || state.screen === S.PLANS) return;
+    if (state.screen !== S.MAP && state.screen !== S.AREA) return;
     state.zone = (p && p.zone) || null;
     if (state.zone) show(S.AREA);
   });
@@ -140,6 +178,12 @@
     document.querySelectorAll('#screens > .screen').forEach(el => sections.set(el.dataset.screen, el));
     // ?screen=map jumps straight to a screen, for development only.
     const jump = params.get('screen');
+    // Jumping into the job cycle needs a job: seed it with the demo zone.
+    const seed = { operator: [R.OPERATOR, 1], procurement: [R.PROCUREMENT, 2], final: [R.PROCUREMENT, 3] }[jump];
+    if (seed && SPILE.data) {
+      state.stage = seed[0];
+      state.job = { zone: SPILE.data.getDemoZone(), planId: 'optimized', step: seed[1] };
+    }
     show(ORDER.includes(jump) ? jump : S.LOGIN);
   }
 

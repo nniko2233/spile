@@ -301,6 +301,26 @@
     return v;
   }
 
+  /**
+   * A still of the map as it is drawn now, for the three-role view. Waits for the
+   * camera to stop and the tiles to settle. Resolves with a data URL, or null.
+   */
+  function snapshot() {
+    return new Promise(resolve => {
+      if (!map) { resolve(null); return; }
+      let done = false;
+      const grab = () => {
+        if (done) return;
+        done = true;
+        map.once('render', () => { try { resolve(map.getCanvas().toDataURL('image/jpeg', 0.88)); } catch (err) { resolve(null); } });
+        map.triggerRepaint();
+      };
+      const settle = () => { map.once('idle', grab); setTimeout(grab, 2500); };
+      if (map.isMoving()) map.once('moveend', settle); else settle();
+      setTimeout(grab, 6000);
+    });
+  }
+
   function init() {
     if (started) return;
     if (!window.maplibregl) { window.addEventListener('maplibre:ready', init, { once: true }); return; }
@@ -316,7 +336,7 @@
     get: () => map,
     isLoaded: () => loaded,
     onLoad(fn) { if (loaded) run(fn); else waiting.push(fn); },
-    cssLen,
+    cssLen, snapshot,
   };
 
   // The map starts loading behind the login screen, so screen 4 is a short wait.
