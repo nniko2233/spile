@@ -11,3 +11,13 @@ For A:
 - `acceptable` / `optimum` are computed on unrounded values. Not every zone has `optimized` as optimum (optimized 234, minimum 191, maximum 9, no_action 9): zones with score above 0.864 only clear the threshold with `maximum`.
 - data/bundle.js does not inline plans.json (it is inherited, I do not touch it), so file:// keeps using your fixture.
 Blocked on: nothing
+
+## 2026-11-15 01:12 — PROJECT.md updated on Kurt's instruction (no board row)
+Touched: PROJECT.md
+For A:
+- New section "UI rules, all screens" and a "Storyboard and the demo video" section. Read both.
+- for A (map, your files): (1) pins with a Plan -> Request -> Procurement progress ring, only on zones with an active plan; in this demo that means a pin at ring step 1 on the zone after `plan:selected`. Pin has no risk colour. (2) flat map for the overview, 3D pitch only once zoomed onto one area. If you prefer that I draw the pin as an HTML overlay, expose a `SPILE.map.project(lon, lat)` and say so in STATUS-A.
+- I draw the "demo data" label myself, in #screen-map / area / plans, bottom left. Keep that corner clear.
+- Screen 6 gets one button, "Create plan for selected areas", which emits `plans:open {zoneId}`. Swipe down does the same.
+- The spec files docs/specs/01-04 are NOT in the repo yet: they are on Kurt's machine and this session cannot read it. The reference line in PROJECT.md is ahead of the files.
+Blocked on: the four spec files (asked Kurt)

@@ -25,6 +25,11 @@ Three users, picked on the login screen:
 The demo logs in as **Risk Manager**. The other two columns are present but not
 implemented.
 
+Slogan, wherever one is shown: **For Reliable Infrastructure**. Not "Cut the
+trees, not the power".
+
+UI specs: docs/specs/01-04 (reference only; PROJECT.md wins on any conflict)
+
 ## The demo, 7 screens
 
 Authoritative spec. Neither agent reinterprets it alone.
@@ -32,6 +37,24 @@ Authoritative spec. Neither agent reinterprets it alone.
 Design principle, it governs every screen: **clean and cinematic. The map carries
 no information around it. Data appears only on click.** No sidebars, no tickers,
 no stat strips, no clocks. The old prototype failed on exactly this.
+
+### UI rules, all screens
+
+- **Colour means risk, the ring means progress. Never mixed.** Corridors and
+  zones are coloured by risk only: red, amber, green.
+- **Pins only where there is an active plan, request or job.** No pin on a zone
+  nobody has acted on. Each pin carries a progress ring with three steps:
+  Plan → Request → Procurement. The pin itself has no risk colour.
+- **One accent colour per role**, used for that role's column, buttons and
+  focus states: Risk Manager, Regional Operator, Procurement each get their own.
+  The accent is never red, amber or green.
+- **At most one short caption per screen.**
+- **A small "demo data" label on the map**, bottom left, dim. It is the one
+  permanent text on the map besides the compass.
+- **Flat map for overviews, 3D only when zoomed into one area.**
+- **No budget control on any screen, ever.** Not a slider, not a field. A budget
+  question in the questionnaire spec (Part F) and "within budget" in the
+  voice-over do not change this.
 
 ### 1. Login, three-way split
 Three vertical columns, full height: Risk Manager / Regional Operator (grid
@@ -60,15 +83,22 @@ Short automatic intro on entry: orbit, then zoom onto one hillside.
 Risk zones drawn as extruded colored polygons from `data/zones.geojson`:
 green = `cls` basso, amber = medio, red = alto. Clicking a red zone opens screen 6.
 
+Also on the map, per the UI rules above: the "demo data" label, and a pin with a
+progress ring on any zone that has a plan selected (ring at step 1, Plan).
+
 ### 6. Area panel
-A side panel scrolling through four blocks, and nothing else:
+A side panel scrolling through four blocks, and nothing else, plus one action
+button under the last block: **Create plan for selected areas**, which opens
+screen 7.
 
 1. **Area information** — hectares, forest type, mean slope, length of the
    crossing MV/HV line, the watercourse and what it discharges onto.
 2. **Risk** — level (Very high), an icon list of the risks actually present in
    that zone (wildfire ignition from line fault, post-fire slope instability,
    flash flood and debris flow, power service interruption), and the expected
-   annual loss in k€/yr.
+   annual loss in k€/yr. One driver is highlighted in this block:
+   **Fall-in reach: N trees taller than their distance to the line**, with N from
+   the zone's `cells_fall` (10 m canopy cells where `d <= h`; say so if asked).
 3. **Mitigation plan** — the action scheme of the optimized plan, with CAPEX and
    OPEX.
 4. **Scenario analysis** — what emergency maintenance costs if nothing is done:
@@ -81,9 +111,15 @@ expected annual loss **45 k€/yr**. Optimized plan **119 k€ + 10 k€/yr**. S
 wildfire event **450 k€**.
 
 ### 7. Management plans view
-The map stays visible at the top as context. A **swipe down** raises the plan
-comparison panel: the map shrinks and the bars for the alternative plans appear
-above it, one per row, after a 1.2 s "optimizing" shimmer.
+The map stays visible at the top as context. The button of screen 6, or a
+**swipe down**, raises the plan comparison panel: the map shrinks to a band at
+the top and the bars for the alternative plans appear below it, one per row,
+after a 1.2 s "optimizing" shimmer.
+
+**The acceptance threshold line is the point of this screen.** It is the
+brightest, most deliberate element in the panel, it is labelled with its value,
+and nothing else in the panel competes with it: no extra charts, no totals
+strip, no secondary controls.
 
 Each bar is split into two adjacent segments: **annualized cost on the left,
 residual risk on the right**. One vertical line crosses the risk side of every
@@ -108,6 +144,18 @@ For the 50 ha demo zone the numbers must come out exactly like this:
 | Maximum plan (undergrounding) | 310 k€ | 6 k€/yr | 43 k€/yr | acceptable, dearer |
 
 Acceptance threshold for that zone: 15 k€/yr.
+
+### Storyboard and the demo video
+
+The demo video follows `docs/specs/04-demo-storyboard.md`: 15 panels, with
+timing and voice-over. The storyboard counts panels, this file counts screens;
+**match by content, not by number**. The storyboard splits the optimiser into
+"running" (panel 7) and "result" (panel 8): both are screen 7 here, the shimmer
+and then the bars. Panels that show the Regional Operator's cutting request
+(spec 02) and the Procurement dashboard (spec 03) describe roles this build does
+not implement; they are narrated over the built screens or mocked in the video,
+and add no screen to the 7 above. Where the storyboard and this file disagree on
+a number, a label or a control, this file wins.
 
 ## Economic model — there is no solver
 
@@ -182,6 +230,7 @@ spile/
 │   └── styles/         CSS, owned by B
 ├── opt/                econ.py + make_plans.py, owned by B
 ├── data/               pipeline output, reused unchanged, plus plans.json
+├── docs/specs/         the four UI spec files, reference only, owned by B
 └── pipeline/           Python pipeline, inherited, never re-run
 ```
 
@@ -305,3 +354,13 @@ Append-only. One line each: what was decided, why.
 - **2026-11-15** plans.json rounding: whole k€ at 10 ha and above, 1 € below.
   One decimal turned the threshold of the smallest zones into 0 and the map
   divides by it.
+- **2026-11-15** (Kurt) UI rules section added: risk colour vs progress ring,
+  pins only on active plan/request/job, one accent per role, one caption per
+  screen, "demo data" label, flat overview and 3D on zoom. Slogan fixed as
+  "For Reliable Infrastructure".
+- **2026-11-15** (Kurt) Screen 6 keeps its four blocks and gains exactly one
+  button, "Create plan for selected areas", and one highlighted driver, fall-in
+  reach. Screen 7: the threshold line is the point; nothing from the specs may
+  compete with it. No budget control anywhere, including the questionnaire.
+- **2026-11-15** (Kurt) The 15-panel storyboard is matched to the 7 screens by
+  content; its panels 7 and 8 are both screen 7.
