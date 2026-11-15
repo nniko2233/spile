@@ -27,7 +27,7 @@
     },
   });
 
-  let form;
+  let form, typing = 0;
   SPILE.ui.screen('auth', {
     init(el) {
       form = h('form.auth', { novalidate: true, autocomplete: 'off', onsubmit: e => { e.preventDefault(); bus.emit(E.AUTH_DONE, {}); } },
@@ -42,6 +42,20 @@
         h('button.btn-link', { type: 'button', text: 'Choose another role', onclick: () => bus.emit(E.SCREEN_BACK, {}) }));
       el.append(form);
     },
-    show() { setTimeout(() => { const i = form.querySelector('input'); if (i) i.focus({ preventScroll: true }); }, 400); },
+    // Storyboard panel 2: the credentials fill themselves in. Any input is accepted.
+    show() {
+      clearInterval(typing);
+      const email = form.elements.email, pass = form.elements.password;
+      const text = 'risk.manager@spile.it';
+      email.value = ''; pass.value = '';
+      let n = 0;
+      setTimeout(() => {
+        typing = setInterval(() => {
+          email.value = text.slice(0, ++n);
+          if (n >= text.length) { clearInterval(typing); pass.value = '••••••••••'; }
+        }, 28);
+      }, 500);
+    },
+    hide() { clearInterval(typing); },
   });
 })();

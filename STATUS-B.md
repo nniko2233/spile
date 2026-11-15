@@ -53,3 +53,19 @@ Blocked on: spec files docs/specs/01-04 (still not in the repo)
 Touched: docs/specs/01-04 (new, unchanged copies)
 SPECS ADDED: docs/specs/. A: read 04 for the screen flow and pin rules.
 Blocked on: nothing
+
+## 2026-11-15 — specs reconciled against PROJECT.md
+Touched: PROJECT.md (storyboard table), app/ui/login.js, questionnaire.js, loading.js
+SPEC CONFLICT: 04 panel 3 wants a points slider and "Fall-in reach" clicked to importance 5. PROJECT.md screen 3 is three questions, "3 of 12". Kept PROJECT.md.
+SPEC CONFLICT: 04 panel 6 card is "area, vegetation, species / flood, fire, fault" with 14 trees. PROJECT.md screen 6 defines four other blocks and the count comes from `cells_fall` (146). Kept PROJECT.md; the fall-in reach driver is shown in block 2.
+SPEC CONFLICT: 04 panel 7 voice-over "within budget", 01 Part F2 yearly budget, and the 01 objective "max risk removed within budget". PROJECT.md: no budget control, minimize annualized cost under the acceptance threshold. Kept PROJECT.md.
+SPEC CONFLICT: 04 panel 8 "actions, cost and months, Save". PROJECT.md screen 7 is the bars with the threshold line and one map toggle. Kept PROJECT.md; the toggle stands in for Save and fills ring step 1.
+SPEC CONFLICT: 01 A9 horizon 1 / 3 / 5 years. PROJECT.md: 20 years. Kept PROJECT.md.
+SPEC CONFLICT: 04 "corridor carries the risk colour". The data is zones, not corridors. Kept the zones.
+Applied from the specs: captions of five words or fewer, credentials autofill on the sign-in form, one accent per role, "demo data" label, pin with three-step ring, colour = risk and ring = progress.
+for A:
+- Panels 9 to 15 (operator map and cutting request, procurement map, assignment, dashboard, three-way split) need new shell states and contract events before any UI can exist. Not built. PROJECT.md says those two roles are not implemented; do not add them unless Kurt or Niko say so.
+- Pin clustering with counts, pulsing pins, "Cleared" state: map work, not built.
+- "Those trees glowing in 3D" on screen 6 (04 panel 6): would be a highlight of the `cells_fall` cells in app/map/cells.js. Not built.
+- A presenter key that calls `SPILE.map` setPin steps 2 and 3 would let the video show Request and Procurement on the ring without building those screens.
+Blocked on: nothing

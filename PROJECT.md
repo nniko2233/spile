@@ -163,15 +163,36 @@ Acceptance threshold for that zone: 15 k€/yr.
 
 ### Storyboard and the demo video
 
-The demo video follows `docs/specs/04-demo-storyboard.md`: 15 panels, with
+The 45-second video follows `docs/specs/04-demo-storyboard.md`: 15 panels with
 timing and voice-over. The storyboard counts panels, this file counts screens;
-**match by content, not by number**. The storyboard splits the optimiser into
-"running" (panel 7) and "result" (panel 8): both are screen 7 here, the shimmer
-and then the bars. Panels that show the Regional Operator's cutting request
-(spec 02) and the Procurement dashboard (spec 03) describe roles this build does
-not implement; they are narrated over the built screens or mocked in the video,
-and add no screen to the 7 above. Where the storyboard and this file disagree on
-a number, a label or a control, this file wins.
+**match by content, not by number**. Where the two disagree on a number, a label
+or a control, this file wins.
+
+| Storyboard panel | Screen here | Built | Difference that stands |
+|---|---|---|---|
+| 1 Role picker | 1 Login split | yes | one accent per role, slogan as the only caption |
+| 2 Login | 2 Login form | yes | credentials fill themselves in |
+| 3 Questionnaire | 3 Questionnaire | yes | three questions, "3 of 12"; no points slider, no importance scores |
+| 4 Loading | 4 Loading | yes | pi ring |
+| 5 Risk map | 5 3D map | yes | zones (not corridors) in red and amber; block shown tilted after a flat first beat |
+| 6 Area detail | 6 Area panel | yes | the four blocks of this file, not "area / flood / fire / fault"; fall-in reach count comes from the data (146), not 14 |
+| 7 Optimiser running | 7, the 1.2 s shimmer | yes | no "within budget": the constraint is the acceptance threshold |
+| 8 Plan result | 7, the bars | yes | bars and threshold line instead of "actions, cost, months"; toggling a plan on is the "save" and fills ring step 1 |
+| 9-11 Operator: map, pin, cutting request | none | no | spec 02 describes it |
+| 12-14 Procurement: map, assignment, dashboard | none | no | spec 03 describes it |
+| 15 Split view of the three roles | none | no | |
+
+Panels 9 to 15 belong to the two roles this build does not implement. In the
+video they are narrated over the built screens or mocked in the edit; they add
+no screen to the 7 above unless Kurt and Niko decide otherwise. The pin already
+carries the three-step ring, so steps 2 and 3 can be shown by calling
+`setPin(zoneId, 2)` / `setPin(zoneId, 3)` in `app/map/zones.js`.
+
+Not taken from the specs, on purpose: any budget field or slider (01 Part F2,
+04 panel 7); the spec optimiser objective "most risk removed within budget"
+(ours is minimum annualized cost under the risk threshold); planning horizons
+of 1, 3 or 5 years (ours is 20); pin clustering with counts, pulsing pins and
+the "Cleared" state (04, map and pin rules).
 
 ## Economic model — there is no solver
 
@@ -403,3 +424,7 @@ Append-only. One line each: what was decided, why.
   (cyan for Risk Manager) is kept to eyebrows, focus and the map toggle.
 - **2026-11-15** (Kurt) Backdrop and block made greener and mistier: the first
   light version read as white. Ground greens are olive so risk green still stands out.
+- **2026-11-15** Specs 01-04 added under docs/specs/ as reference. The storyboard
+  table in this file records how its 15 panels map to the 7 screens and which
+  spec items are deliberately not taken.
+- **2026-11-15** Captions kept to five words or fewer (spec 04 clean-screen rule).

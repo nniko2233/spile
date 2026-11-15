@@ -17,7 +17,7 @@
           <g class="pi-digits"><text textLength="${LEN - 6}" lengthAdjust="spacing"><textPath href="#pi-path">${digits}</textPath></text></g>
         </svg>
         <div class="loading-logo">${SPILE.ui.logo(72)}<span class="brand-name">SPILE</span></div>
-        <p class="caption loading-caption">Reading terrain, canopy and lines</p>`,
+        <p class="caption loading-caption">Scoring every span</p>`,
       }));
     },
     show(el) { el.classList.remove('run'); void el.offsetWidth; el.classList.add('run'); },

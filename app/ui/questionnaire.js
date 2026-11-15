@@ -46,7 +46,7 @@
             })),
             h('button.btn.btn-primary', { type: 'button', text: 'Build the risk map',
               onclick: () => bus.emit(E.SURVEY_DONE, { answers: Object.assign({}, answers) }) }),
-            h('p.caption', { text: 'The other nine use your organisation defaults.' }))
+            h('p.caption', { text: 'Nine more use your defaults' }))
         : h('div.q-card', null,
             h('p.eyebrow', { text: 'Question ' + n }),
             h('h1.q-title', { text: q.title }),
