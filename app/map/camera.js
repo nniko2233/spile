@@ -126,9 +126,30 @@
 
   /* -------------------------------------------------------------- framing */
 
+  /** One made-up zone standing for a whole selection: its middle, its mean height. */
+  function frameOf(sel, screen) {
+    const lon = sel.map(z => z.lon), lat = sel.map(z => z.lat);
+    const w = Math.min(...lon), e = Math.max(...lon), s = Math.min(...lat), n = Math.max(...lat);
+    const mid = { lon: (w + e) / 2, lat: (s + n) / 2, elev: sel.reduce((t, z) => t + (Number(z.elev) || 0), 0) / sel.length };
+    const pad = paddingFor(screen);
+    const viewW = Math.max(240, window.innerWidth - pad.right - pad.left), viewH = Math.max(200, window.innerHeight - pad.bottom - pad.top);
+    const mLon = (e - w) * 111320 * Math.cos(mid.lat * Math.PI / 180), mLat = (n - s) * 111320;
+    // Metres per pixel that fit the box with a margin; the tilt stretches depth, hence the 1.7.
+    const mpp = Math.max((mLon + 400) / (viewW * 0.72), (mLat + 400) * 1.7 / (viewH * 0.72));
+    const zoom = Math.log2(40075016.686 * Math.cos(mid.lat * Math.PI / 180) / (512 * mpp));
+    return { mid, zoom: Math.max(11.4, Math.min(15.0, zoom)) };
+  }
+
   function flyToZone(zone, screen) {
     if (!map || !zone) return;
     token++;
+    const sel = (SPILE.state && SPILE.state.selection) || [];
+    if (sel.length > 1) {
+      const f = frameOf(sel, screen);
+      map.flyTo(Object.assign(lookAt(f.mid, { zoom: f.zoom, pitch: 54, bearing: -34 }),
+        { padding: paddingFor(screen), duration: 1700, curve: 1.2, essential: true }));
+      return;
+    }
     map.flyTo(Object.assign(lookAt(zone, { zoom: 15.2, pitch: 62, bearing: upslope(zone) }),
       { padding: paddingFor(screen), duration: 1700, curve: 1.2, essential: true }));
   }
@@ -164,7 +185,8 @@
       if (p.prev === S.PLANS && zone) flyToZone(zone, S.AREA);
     } else if (p.screen === S.PLANS) {
       if (introState !== 'done') skipIntro();
-      if (zone) {
+      if (zone && SPILE.state.selection.length > 1) flyToZone(zone, S.PLANS);
+      else if (zone) {
         map.easeTo(Object.assign(lookAt(zone, { zoom: 15.0, pitch: 58, bearing: upslope(zone) }),
           { padding: paddingFor(S.PLANS), duration: 1300, essential: true }));
       }
@@ -179,6 +201,8 @@
     if (!map || !p || !p.zone) return;
     if (introState !== 'done') skipIntro();
     if (SPILE.state && SPILE.state.screen === S.PLANS) return;
+    // The shell handles this event after the map: frame what it is about to hold.
+    SPILE.state.selection = (p.zones && p.zones.length) ? p.zones : [p.zone];
     flyToZone(p.zone, S.AREA);
   });
 

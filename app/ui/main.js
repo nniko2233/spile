@@ -81,6 +81,26 @@
   const host = document.getElementById('screens');
   if (host) host.append(h('div.demo-data', { text: 'Demo data' }));
 
+  // Selection tools, the only controls on the map: lasso several areas, or take them all.
+  const lassoBtn = h('button', { type: 'button', 'aria-pressed': 'false',
+    html: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4c5 0 9 2.500 9 6s-4 6-9 6-9-2.500-9-6 4-6 9-6zM7 15.500c-1 1.200-1 2.700.300 3.300 1.200.600 2.700 0 2.700-1.300 0-1-1-1.600-2-1.500M9 19c0 1.500-1 2.500-2.500 3"/></svg><span>Lasso</span>',
+    onclick: () => {
+      if (lassoBtn.classList.contains('is-on')) return;
+      lassoBtn.classList.add('is-on'); lassoBtn.setAttribute('aria-pressed', 'true');
+      lassoBtn.querySelector('span').textContent = 'Draw a loop';
+      bus.emit(E.LASSO_START, {});
+    } });
+  const regionBtn = h('button', { type: 'button',
+    html: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg><span>Whole region</span>',
+    onclick: () => bus.emit(E.REGION_SELECT, {}) });
+  if (host) host.append(h('div.map-tools', { role: 'toolbar', 'aria-label': 'Select areas' }, lassoBtn, regionBtn));
+  bus.on(E.LASSO_END, () => {
+    lassoBtn.classList.remove('is-on'); lassoBtn.setAttribute('aria-pressed', 'false');
+    lassoBtn.querySelector('span').textContent = 'Lasso';
+  });
+  bus.on(E.INTRO_DONE, () => { document.body.dataset.intro = 'done'; });
+  bus.on(E.SCREEN_SHOW, p => { if (p.screen === 'area' || (SPILE.state && SPILE.state.introDone)) document.body.dataset.intro = 'done'; });
+
   const base = (document.currentScript && document.currentScript.src.replace(/[^/]*$/, '')) || 'app/ui/';
   ['login.js', 'questionnaire.js', 'loading.js', 'area.js', 'plans.js', 'flow.js', 'auto.js'].forEach(f => {
     const s = document.createElement('script');

@@ -110,3 +110,14 @@ For A:
 - zones.js: the pin catches up on screen:show for operator / procurement / final, because the map can finish loading before the shell seeds a job on a `?screen=` jump.
 - camera.js: procurement keeps 40% of the height clear at the bottom for the dashboard.
 Blocked on: nothing
+
+## 2026-11-15 — CONTRACT CHANGE (own commit 2540ac0) + Kurt's review, part 3: lasso and multi-area selection
+Touched: app/contract.js (own commit), app/data/store.js, app/shell/shell.js, app/map/zones.js, camera.js, app/ui/main.js, area.js, plans.js, flow.js, app/styles/main.css, PROJECT.md
+CONTRACT CHANGE: additive. `zone:selected` now carries `{zone, zones}` (zone = primary, zones = whole selection). `plan:selected` may carry `planByZone`. New events `lasso:start`, `lasso:end {count}`, `region:select`.
+For A (your files, edited because you are still stopped and Kurt asked for the lasso):
+- store.js: `SPILE.data.getSelectionPlans(ids)`; for one id it returns `getPlans(id)` unchanged.
+- shell.js: `state.selection` (array of zones) next to `state.zone`; the job keeps `zones`.
+- zones.js: `setSelection(ids)`, click adds or removes while the panel is open, `startLasso()`, `selectRegion()`, recolour honours `planByZone`.
+- camera.js: a selection of several zones is framed as a whole (`frameOf`).
+- Ran headless: lasso around the demo hillside picks 24 areas (83 ha, EAL 78, threshold 25); optimized mix 18 optimized + 6 minimum = 51 k€/yr against 71 for maximum everywhere; zone 406 alone still gives 45 / 35 / 30 / 43 exactly; Whole region selects 196.
+Blocked on: nothing

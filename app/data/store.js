@@ -100,6 +100,76 @@
     return plan.residual_k_yr / zp.threshold_k_yr;
   }
 
+  /**
+   * Plans for a selection of several zones, in the ZonePlans shape, money summed.
+   *
+   * No action, minimum and maximum apply one plan to every zone. The optimized
+   * plan gives each zone its own plan: the cheapest total annualized cost that
+   * keeps the total residual risk under the total acceptance threshold. It is a
+   * choice among the four precomputed plans per zone, found by relaxing the risk
+   * constraint with a multiplier and bisecting on it; plain JS, no solver. If a
+   * single plan applied everywhere beats it, that plan is taken instead, so the
+   * optimized row is never dearer than an acceptable row.
+   */
+  function getSelectionPlans(ids) {
+    const list = (ids || []).map(getPlans).filter(Boolean);
+    if (!list.length) return null;
+    if (list.length === 1) return list[0];
+
+    const r3 = x => Math.round(x * 1000) / 1000;
+    const total = f => list.reduce((s, zp) => s + f(zp), 0);
+    const threshold = total(zp => zp.threshold_k_yr);
+    const plan = (zp, id) => zp.plans.find(p => p.id === id);
+    const sumOf = choice => {
+      const t = { capex_k: 0, opex_k_yr: 0, residual_k_yr: 0, annualized_k_yr: 0 };
+      list.forEach((zp, i) => { const p = plan(zp, choice[i]); Object.keys(t).forEach(key => { t[key] += p[key]; }); });
+      return t;
+    };
+
+    const uniform = SPILE.PLAN_IDS.map(id => ({ id, choice: list.map(() => id), t: sumOf(list.map(() => id)) }));
+
+    // Per-zone choice: minimise annualized + lambda * residual, smallest feasible lambda.
+    const pick = lambda => list.map(zp => zp.plans.reduce((best, p) =>
+      (p.annualized_k_yr + lambda * p.residual_k_yr < best.annualized_k_yr + lambda * best.residual_k_yr - 1e-12 ? p : best)).id);
+    const feasible = choice => sumOf(choice).residual_k_yr <= threshold + 1e-9;
+    let mix = pick(0);
+    if (!feasible(mix)) {
+      let lo = 0, hi = 1;
+      while (!feasible(pick(hi)) && hi < 1e6) hi *= 2;
+      for (let i = 0; i < 40; i++) { const mid = (lo + hi) / 2; if (feasible(pick(mid))) hi = mid; else lo = mid; }
+      mix = pick(hi);
+    }
+    let best = { choice: mix, t: sumOf(mix) };
+    uniform.forEach(u => { if (u.t.residual_k_yr <= threshold + 1e-9 && u.t.annualized_k_yr < best.t.annualized_k_yr - 1e-9) best = u; });
+
+    const ref = list[0].plans;
+    const plans = SPILE.PLAN_IDS.map((id, n) => {
+      const isMix = id === 'optimized', src = isMix ? best : uniform[n];
+      const out = {
+        id, label: ref[n].label,
+        capex_k: r3(src.t.capex_k), opex_k_yr: r3(src.t.opex_k_yr),
+        residual_k_yr: r3(src.t.residual_k_yr), annualized_k_yr: r3(src.t.annualized_k_yr),
+        acceptable: src.t.residual_k_yr <= threshold + 1e-9, optimum: isMix,
+        actions: ref[n].actions,
+      };
+      if (isMix) {
+        out.planByZone = {}; out.mix = {};
+        list.forEach((zp, i) => { out.planByZone[zp.zone_id] = best.choice[i]; out.mix[best.choice[i]] = (out.mix[best.choice[i]] || 0) + 1; });
+        // The actions of the widest plan any zone gets.
+        const widest = SPILE.PLAN_IDS.slice().reverse().find(pid => out.mix[pid]);
+        out.actions = ref[SPILE.PLAN_IDS.indexOf(widest)].actions;
+      }
+      return out;
+    });
+
+    return {
+      zone_id: list[0].zone_id, zone_ids: list.map(zp => zp.zone_id), count: list.length,
+      area_ha: r3(total(zp => zp.area_ha)), eal_k_yr: r3(total(zp => zp.eal_k_yr)),
+      threshold_k_yr: r3(threshold), event_cost_k: r3(total(zp => zp.event_cost_k)),
+      plans,
+    };
+  }
+
   SPILE.data = {
     ready,
     getZones: () => zones,
@@ -111,7 +181,7 @@
     getStats: () => raw.stats || null,
     getDemoZoneId: () => demoZoneId,
     getDemoZone: () => zoneById.get(demoZoneId) || null,
-    getPlans,
+    getPlans, getSelectionPlans,
     getPlan,
     getOptimumPlan: zoneId => { const zp = getPlans(zoneId); return (zp && zp.plans.find(p => p.optimum)) || null; },
     residualRatio,

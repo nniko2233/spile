@@ -31,6 +31,8 @@
 
   const jobZone = () => (SPILE.state.job && SPILE.state.job.zone) || null;
   const zoneId = () => { const z = jobZone(); return z ? z.id : null; };
+  /** "Area 406" or "5 areas incl. 406": the job covers the whole saved selection. */
+  const unitsText = () => { const job = SPILE.state.job || {}, n = (job.zones || []).length; return n > 1 ? `${n} areas incl. ${zoneId()}` : `Area ${zoneId()}`; };
   const chip = name => h('div.role-chip', null, h('i.dot'), h('span', { text: name }));
 
   /* -------------------------------------------------------------- wizard */
@@ -115,7 +117,7 @@
       ],
       steps: [
         { name: 'Scope', fields: [
-          { n: '1.1', label: 'Units included', value: `Area ${zoneId()}, spans 41–44`, pre: true },
+          { n: '1.1', label: 'Units included', value: `${unitsText()}, spans 41–44`, pre: true },
           { n: '1.2', label: 'Request type', value: 'Risk-driven from map', tag: 'Required' },
           { n: '1.3', label: 'Linked event', value: 'None', tag: 'If emergency' },
           { n: '1.4', label: 'Short description', value: 'Trees within fall-in reach of the line above the settlement', tag: 'Required' } ] },
@@ -261,7 +263,7 @@
 
   /** Spec 03 sample rows, plus this job. */
   const rows = assigned => [
-    { id: JOB.id, mine: true, where: `${JOB.region} · ${JOB.asset}, area ${zoneId()}`, risk: 'alto', scope: `${JOB.fell} fell, ${JOB.prune} prune, ${JOB.ha} ha`,
+    { id: JOB.id, mine: true, where: `${JOB.region} · ${JOB.asset}, ${unitsText().toLowerCase()}`, risk: 'alto', scope: `${JOB.fell} fell, ${JOB.prune} prune, ${JOB.ha} ha`,
       flags: ['outage', 'permit'], window: `${JOB.start} → ${JOB.deadline}`, status: assigned ? 'Assigned' : 'In procurement',
       contractor: assigned ? JOB.contractor : null, planned: assigned ? `${JOB.start} → ${JOB.end}` : '–', est: JOB.estimate,
       order: assigned ? JOB.order : '–', po: assigned ? JOB.po : '–', invoice: '–', evidence: '–', verified: '–' },

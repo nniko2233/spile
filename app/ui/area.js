@@ -25,7 +25,7 @@
     road: ['transit', 'Road closure'],
   };
 
-  const ASSET_EN = [[/Linea AT/i, 'HV line'], [/Linea MT/i, 'MV line'], [/Ferrovia/i, 'Railway'], [/Strada/i, 'Road']];
+  const ASSET_EN = [[/Linea AT/i, 'HV line'], [/Linea MT/i, 'MV line'], [/Ferrovia/i, 'Railway'], [/Strada primaria/i, 'Primary road'], [/Strada secondaria/i, 'Secondary road'], [/Strada/i, 'Road']];
   const assetName = t => ASSET_EN.reduce((s, [re, en]) => s.replace(re, en), t || '');
 
   function level(score) {
@@ -79,25 +79,62 @@
     return imp ? `Fall-in reach · importance ${imp} of 5` : 'Fall-in reach';
   }
 
+  const PLAN_WORD = { no_action: 'no action', minimum: 'minimum', optimized: 'optimized', maximum: 'maximum' };
+  /** "3 optimized, 2 minimum": how the optimized plan of a selection splits over its areas. */
+  const mixText = mix => SPILE.PLAN_IDS.slice().reverse().filter(id => mix[id]).map(id => `${mix[id]} ${PLAN_WORD[id]}`).join(', ');
+
+  /** The same panel for several areas: sums, the worst level, every risk present. */
+  function modelMany(sel) {
+    const D = SPILE.data, parts = sel.map(model);
+    const zp = D.getSelectionPlans(sel.map(z => z.id)) || {};
+    const opt = (zp.plans || []).find(p => p.optimum) || null;
+    const demoIn = sel.some(z => z.id === D.getDemoZoneId());
+    const areaOf = z => (D.getPlans(z.id) || {}).area_ha || z.area_ha;
+    const slopePct = z => (z.id === D.getDemoZoneId() ? 28 : Math.tan(z.slope * Math.PI / 180) * 100);
+    const slope = sel.reduce((t, z) => t + slopePct(z) * areaOf(z), 0) / sel.reduce((t, z) => t + areaOf(z), 0);
+    const lines = Array.from(new Set(sel.map(z => (z.id === D.getDemoZoneId() ? '15 kV MV line' : z.asset_main ? assetName(z.asset_main.type) : null)).filter(Boolean)));
+    const wet = sel.filter(z => z.id === D.getDemoZoneId() || (z.types || []).includes('hydro')).length;
+    const order = ['fire', 'slope', 'hydro', 'power', 'rail', 'road'];
+    const risks = order.filter(r => parts.some(p => p.risks.includes(r)));
+    const veryHigh = parts.filter(p => p.level === 'Very high').length;
+    const ids = sel.map(z => z.id);
+    return {
+      zp, opt, many: sel.length, fall: parts.reduce((t, p) => t + p.fall, 0),
+      title: `${sel.length} areas`, sub: ids.slice(0, 7).join(' · ') + (ids.length > 7 ? ` · +${ids.length - 7}` : ''),
+      level: veryHigh ? 'Very high' : 'High', cls: 'alto',
+      info: [
+        ['Area', `${k(zp.area_ha)} ha in ${sel.length} areas`],
+        ['Forest type', demoIn ? 'Broadleaf, chestnut and beech, and tree cover' : 'Tree cover'],
+        ['Mean slope', `${Math.round(slope)}%`],
+        ['Line crossing', lines.length ? lines.join(', ') : 'None'],
+        ['Watercourse', wet ? `${wet} of ${sel.length} areas drain onto a watercourse` : 'None mapped'],
+      ],
+      risks,
+    };
+  }
+
   const block = (n, title, ...kids) =>
     h('section.block', null, h('header.block-head', null, h('span.block-n', { text: '0' + n }), h('h2', { text: title })), kids);
 
   const figure = (value, unit, label, cls) =>
     h('div.figure' + (cls ? '.' + cls : ''), null, h('span.figure-v', null, value, h('small', { text: ' ' + unit })), h('span.figure-l', { text: label }));
 
-  let panel, body, zone = null, wheelAcc = 0, wheelT = 0, touchY = null;
+  let panel, body, zone = null, selection = [], wheelAcc = 0, wheelT = 0, touchY = null;
 
   function openPlans() { if (zone) bus.emit(E.PLANS_OPEN, { zoneId: zone.id }); }
 
-  function render(z) {
-    zone = z;
-    const m = model(z);
+  function render(sel) {
+    if (!Array.isArray(sel)) sel = [sel];
+    selection = sel; zone = sel[0];
+    const z = zone;
+    const m = sel.length > 1 ? modelMany(sel) : model(z);
     const p = m.opt;
     const acts = p && p.actions && p.actions.length ? p.actions : null;
 
     body.replaceChildren(
       h('header.area-head', null,
-        h('div', null, h('p.eyebrow', { text: 'Selected area' }), h('h1', { text: m.title })),
+        h('div', null, h('p.eyebrow', { text: m.many ? 'Selected areas' : 'Selected area' }), h('h1', { text: m.title }),
+          h('p.area-sub', { text: m.many ? m.sub : 'Tap more red areas to add them' })),
         h('button.icon-btn', { type: 'button', 'aria-label': 'Close', html: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>',
           onclick: () => bus.emit(E.ZONE_CLEARED, {}) })),
 
@@ -114,6 +151,7 @@
 
       block(3, 'Mitigation plan',
         h('p.plan-name', { text: p ? p.label : 'No plan clears the threshold' }),
+        p && p.mix && h('p.muted', { text: `One plan per area: ${mixText(p.mix)}` }),
         acts ? h('ol.actions', null, acts.map(a => h('li', { text: a })))
              : h('p.muted', { text: 'Risk already below the acceptance threshold. No works required.' }),
         p && h('div.figures', null,
@@ -156,12 +194,13 @@
         touchY = null;
       }, { passive: true });
       // Clicking another red zone while the panel is open swaps its content.
-      bus.on(E.ZONE_SELECTED, p => { if (p && p.zone) render(p.zone); });
-      bus.on('data:plans', () => { if (zone && SPILE.state.screen === 'area') render(zone); });
+      bus.on(E.ZONE_SELECTED, p => { if (p && p.zone) render(p.zones && p.zones.length ? p.zones : [p.zone]); });
+      bus.on('data:plans', () => { if (zone && SPILE.state.screen === 'area') render(selection); });
     },
     show() {
-      const z = SPILE.state.zone || zone;
-      if (z && (!zone || zone.id !== z.id || !body.childElementCount)) render(z);
+      const sel = (SPILE.state.selection && SPILE.state.selection.length) ? SPILE.state.selection : selection;
+      const same = sel.length === selection.length && sel.every((z, i) => selection[i] && selection[i].id === z.id);
+      if (sel.length && (!same || !body.childElementCount)) render(sel);
     },
   });
 })();

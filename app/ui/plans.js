@@ -25,7 +25,11 @@
 
   function toggle(planId) {
     if (selected === planId) { selected = null; bus.emit(E.PLAN_CLEARED, {}); }
-    else { selected = planId; bus.emit(E.PLAN_SELECTED, { zoneId, planId }); }
+    else {
+      selected = planId;
+      const p = zplans.plans.find(x => x.id === planId);
+      bus.emit(E.PLAN_SELECTED, { zoneId, planId, planByZone: (p && p.planByZone) || undefined });
+    }
     root.querySelectorAll('.plan-row').forEach(r => {
       const on = r.dataset.plan === selected;
       r.classList.toggle('is-on', on);
@@ -60,8 +64,12 @@
     const zone = SPILE.state.zone;
     if (!zone) return;
     zoneId = zone.id;
-    const zp = zplans = SPILE.data.getPlans(zoneId);
+    const sel = (SPILE.state.selection && SPILE.state.selection.length) ? SPILE.state.selection : [zone];
+    const zp = zplans = SPILE.data.getSelectionPlans(sel.map(z => z.id));
     if (!zp) return;
+    const many = sel.length > 1;
+    const WORD = { no_action: 'no action', minimum: 'minimum', optimized: 'optimized', maximum: 'maximum' };
+    const mixText = mix => SPILE.PLAN_IDS.slice().reverse().filter(id => mix[id]).map(id => `${mix[id]} ${WORD[id]}`).join(', ');
 
     // Cost of the works per year = annualized total minus the residual risk.
     const rows = zp.plans.map(p => ({ p, cost: Math.max(0, p.annualized_k_yr - p.residual_k_yr), risk: p.residual_k_yr }));
@@ -76,7 +84,7 @@
         h('button.icon-btn', { type: 'button', 'aria-label': 'Back to the area',
           html: '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>', onclick: () => bus.emit(E.SCREEN_BACK, {}) }),
         h('div', null,
-          h('p.eyebrow', { text: `Area ${zoneId} · ${k(zp.area_ha)} ha` }),
+          h('p.eyebrow', { text: many ? `${sel.length} areas · ${k(zp.area_ha)} ha` : `Area ${zoneId} · ${k(zp.area_ha)} ha` }),
           h('h1', { text: 'Management plans' })),
         h('p.objective', null, h('b', { text: 'Objective ' }),
           'minimize annualized cost subject to residual risk below the acceptance threshold.'),
@@ -97,7 +105,7 @@
             },
               h('span.plan-label', null,
                 h('b', { text: p.label }),
-                h('small', { text: p.capex_k ? `CAPEX ${k(p.capex_k)} k€` : 'CAPEX 0' })),
+                h('small', { text: (p.capex_k ? `CAPEX ${k(p.capex_k)} k€` : 'CAPEX 0') + (p.mix ? ` · ${mixText(p.mix)}` : '') })),
               h('span.plan-track', null,
                 h('i.seg.seg-cost', { style: `width:${cost * unit}%` }, cost > 0 && h('em', { text: k(cost) })),
                 h('i.seg.seg-risk', { style: `width:${risk * unit}%` }, h('em', { text: k(risk) }))),

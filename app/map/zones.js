@@ -32,8 +32,9 @@
   const current = new Map(zones.map(z => [z.id, (CLASS_RGB[z.cls] || CLASS_RGB.medio).slice()]));
 
   let map = null, cellsByZone = new Map();
-  let selectedId = null, hoveredId = null;
+  let selectedId = null, selectedIds = [], hoveredId = null;
   let committedPlan = null;       // plan id the map is coloured by, or null
+  let committedMix = null;        // {zoneId: planId} overriding it for the zones of a selection, or null
   let previewZone = null;         // zone currently showing a PLAN_HOVER preview
   let revealed = false;
 
@@ -153,9 +154,9 @@
 
   function setHover(zoneId) {
     if (zoneId === hoveredId) return;
-    if (hoveredId != null && hoveredId !== selectedId) setLift(hoveredId, 0, 260);
+    if (hoveredId != null && !selectedIds.includes(hoveredId)) setLift(hoveredId, 0, 260);
     hoveredId = zoneId;
-    if (hoveredId != null && hoveredId !== selectedId) setLift(hoveredId, 0.3, 200);
+    if (hoveredId != null && !selectedIds.includes(hoveredId)) setLift(hoveredId, 0.3, 200);
   }
 
   let moveRaf = 0, lastPoint = null;
@@ -164,36 +165,128 @@
     if (moveRaf) return;
     moveRaf = requestAnimationFrame(() => {
       moveRaf = 0;
-      const zone = interactive() && !map.isMoving() ? zoneAt(lastPoint) : null;
-      map.getCanvas().style.cursor = zone ? 'pointer' : '';
+      const zone = interactive() && !lasso && !map.isMoving() ? zoneAt(lastPoint) : null;
+      if (!lasso) map.getCanvas().style.cursor = zone ? 'pointer' : '';
       setHover(zone ? zone.id : null);
     });
   }
 
   function onClick(e) {
-    if (!interactive()) return;
+    if (!interactive() || lasso) return;
     const zone = zoneAt(e.point);
-    if (zone) selectZone(zone.id);
+    if (!zone) return;
+    // On the bare map a click starts a selection; with the panel open it adds to
+    // it, or takes the area out again (never the last one).
+    if (SPILE.state.screen === S.AREA && selectedIds.length) {
+      const has = selectedIds.includes(zone.id);
+      if (has && selectedIds.length === 1) return;
+      setSelection(has ? selectedIds.filter(id => id !== zone.id) : selectedIds.concat(zone.id));
+    } else setSelection([zone.id]);
   }
 
-  function selectZone(id) {
-    const zone = D.getZone(id);
-    if (!zone || !map) return;
-    if (selectedId !== zone.id) {
-      if (selectedId != null) setLift(selectedId, 0);
-      selectedId = zone.id;
-      map.setFilter('zones-selected', ['==', ['get', 'id'], zone.id]);
-      setLift(zone.id, 1, 520);
+  /**
+   * Replace the selection. The first id is the primary zone: the one the camera,
+   * the pin and the job hang on. Emits ZONE_SELECTED {zone, zones}.
+   */
+  function setSelection(ids, silent) {
+    if (!map) return;
+    ids = ids.filter((id, i) => D.getZone(id) && ids.indexOf(id) === i);
+    selectedIds.filter(id => !ids.includes(id)).forEach(id => setLift(id, 0));
+    ids.filter(id => !selectedIds.includes(id)).forEach(id => setLift(id, 1, 520));
+    selectedIds = ids;
+    selectedId = ids.length ? ids[0] : null;
+    map.setFilter('zones-selected', ids.length ? ['in', ['get', 'id'], ['literal', ids]] : ['==', ['get', 'id'], -1]);
+    if (ids.length && !silent) bus.emit(E.ZONE_SELECTED, { zone: D.getZone(ids[0]), zones: ids.map(D.getZone) });
+  }
+
+  function selectZone(id) { if (D.getZone(id)) setSelection([id]); }
+  function clearSelection() { if (selectedIds.length && map) setSelection([], true); }
+
+  /** Primary first: the demo zone if it is in, else the highest score. */
+  function ordered(ids) {
+    const demo = D.getDemoZoneId();
+    return ids.slice().sort((x, y) => (y === demo) - (x === demo) || D.getZone(y).score - D.getZone(x).score);
+  }
+
+  /** Every red area of the block. */
+  function selectRegion() {
+    if (!map || !interactive()) return;
+    setSelection(ordered(zones.filter(z => z.cls === 'alto').map(z => z.id)));
+  }
+
+  /* --------------------------------------------------------------- lasso */
+
+  let lasso = null;   // {svg, path, pts, drawing, handlers} while the tool is armed
+
+  function inside(pt, poly) {
+    let hit = false;
+    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+      const a = poly[i], b = poly[j];
+      if ((a[1] > pt[1]) !== (b[1] > pt[1]) && pt[0] < (b[0] - a[0]) * (pt[1] - a[1]) / (b[1] - a[1]) + a[0]) hit = !hit;
     }
-    bus.emit(E.ZONE_SELECTED, { zone });
+    return hit;
   }
 
-  function clearSelection() {
-    if (selectedId == null || !map) return;
-    setLift(selectedId, 0);
-    selectedId = null;
-    map.setFilter('zones-selected', ['==', ['get', 'id'], -1]);
+  /** Where a zone is drawn on screen, terrain included. */
+  function screenPoint(zone) {
+    const tr = map.transform;
+    const elev = (Number(zone.elev) || 0) * SPILE.map.EXAGGERATION;
+    if (tr && typeof tr.locationPoint3D === 'function' && window.maplibregl) {
+      try { const p3 = tr.locationPoint3D(new maplibregl.LngLat(zone.lon, zone.lat), elev - (tr.elevation || 0)); if (p3) return [p3.x, p3.y]; } catch (err) { /* fall through */ }
+    }
+    const p = map.project([zone.lon, zone.lat]);
+    return [p.x, p.y];
   }
+
+  /** Arm the lasso: the next drag on the map draws a loop and selects the red areas in it. */
+  function startLasso() {
+    if (!map || lasso || !interactive()) return;
+    const box = map.getCanvasContainer();
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg'), path = document.createElementNS(NS, 'path');
+    svg.setAttribute('class', 'lasso'); svg.appendChild(path);
+    map.getContainer().appendChild(svg);
+    ['dragPan', 'dragRotate', 'boxZoom', 'doubleClickZoom', 'touchZoomRotate'].forEach(hd => map[hd] && map[hd].disable());
+    map.getCanvas().style.cursor = 'crosshair';
+
+    const pos = e => { const r = box.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+    const draw = closed => path.setAttribute('d', lasso.pts.length ? 'M' + lasso.pts.map(p => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' L') + (closed ? ' Z' : '') : '');
+    const down = e => { if (e.button) return; lasso.drawing = true; lasso.pts = [pos(e)]; box.setPointerCapture && box.setPointerCapture(e.pointerId); e.preventDefault(); e.stopPropagation(); };
+    const move = e => {
+      if (!lasso.drawing) return;
+      const p = pos(e), q = lasso.pts[lasso.pts.length - 1];
+      if (Math.hypot(p[0] - q[0], p[1] - q[1]) > 4) { lasso.pts.push(p); draw(false); }
+    };
+    const up = () => { if (!lasso.drawing) return; lasso.drawing = false; draw(true); endLasso(true); };
+    const key = e => { if (e.key === 'Escape') { e.stopPropagation(); endLasso(false); } };
+
+    lasso = { svg, path, pts: [], drawing: false, off() {
+      box.removeEventListener('pointerdown', down, true); box.removeEventListener('pointermove', move, true);
+      window.removeEventListener('pointerup', up, true); window.removeEventListener('keydown', key, true);
+    } };
+    box.addEventListener('pointerdown', down, true); box.addEventListener('pointermove', move, true);
+    window.addEventListener('pointerup', up, true); window.addEventListener('keydown', key, true);
+  }
+
+  function endLasso(apply) {
+    if (!lasso) return;
+    const { svg, pts } = lasso;
+    lasso.off();
+    ['dragPan', 'dragRotate', 'boxZoom', 'doubleClickZoom', 'touchZoomRotate'].forEach(hd => map[hd] && map[hd].enable());
+    map.getCanvas().style.cursor = '';
+    svg.classList.add('is-done');
+    setTimeout(() => svg.remove(), 700);
+    // Keep onClick from firing on the mouseup that closes the loop.
+    setTimeout(() => { lasso = null; }, 0);
+
+    let ids = [];
+    if (apply && pts.length > 5) ids = ordered(zones.filter(z => z.cls === 'alto' && inside(screenPoint(z), pts)).map(z => z.id));
+    bus.emit(E.LASSO_END, { count: ids.length });
+    if (ids.length) setSelection(ids);
+  }
+
+  bus.on(E.LASSO_START, startLasso);
+  bus.on(E.REGION_SELECT, selectRegion);
 
   /* ------------------------------------------------------------ recolour */
 
@@ -201,6 +294,8 @@
   let colorRaf = 0;
 
   function targetFor(zone, planId) {
+    // The optimized plan of a selection gives each of its zones its own plan.
+    if (planId && committedMix && committedMix[zone.id] && planId === committedPlan) planId = committedMix[zone.id];
     const hex = planId ? D.residualColor(zone.id, planId) : null;
     return hex ? hexToRgb(hex) : (CLASS_RGB[zone.cls] || CLASS_RGB.medio);
   }
@@ -239,6 +334,7 @@
    */
   function showPlan(planId, originZoneId, opts = {}) {
     committedPlan = planId || null;
+    committedMix = (planId && opts.planByZone) || null;
     previewZone = null;
     if (!map) return;
     const origin = D.getZone(originZoneId) || D.getZone(selectedId) || D.getDemoZone();
@@ -314,7 +410,7 @@
     pinZone = zone.id; pinStep = step;
   }
 
-  bus.on(E.PLAN_SELECTED, p => { if (p && p.planId) showPlan(p.planId, p.zoneId); });
+  bus.on(E.PLAN_SELECTED, p => { if (p && p.planId) showPlan(p.planId, p.zoneId, { planByZone: p.planByZone }); });
   bus.on(E.PLAN_CLEARED, () => showPlan(null, selectedId));
 
   // The pin follows the job, not the plan toggle.
@@ -341,10 +437,11 @@
   });
 
   // plans.json may land after a plan was selected against the fixture.
-  bus.on('data:plans', () => { if (committedPlan) showPlan(committedPlan, selectedId, { instant: true }); });
+  bus.on('data:plans', () => { if (committedPlan) showPlan(committedPlan, selectedId, { instant: true, planByZone: committedMix }); });
 
   Object.assign(SPILE.map, {
-    selectZone, clearSelection, revealZones, showPlan, setPin, pinSVG,
+    selectZone, setSelection, selectRegion, startLasso, clearSelection, revealZones, showPlan, setPin, pinSVG,
+    selectedZoneIds: () => selectedIds.slice(),
     pinElement: () => (pin ? pin.getElement() : null),
     selectedZoneId: () => selectedId,
     shownPlan: () => committedPlan,

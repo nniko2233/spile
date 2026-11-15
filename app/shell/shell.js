@@ -38,6 +38,7 @@
   /** Read-only snapshot for anyone who loads late and missed SCREEN_SHOW. */
   const state = SPILE.state = {
     screen: null, prev: null, role: null, answers: null, zone: null,
+    selection: [],           // every selected Zone; zone is the primary one
     mapReady: false, introDone: false,
     stage: R.RISK_MANAGER,   // the role whose turn it is on the role picker
     job: null,               // {zone, planId, step} once a plan is saved; step 1 Plan, 2 Request, 3 Procurement
@@ -66,7 +67,7 @@
     bus.emit(E.SCREEN_SHOW, { screen, prev: state.prev });
 
     if (screen === S.LOADING) holdLoading();
-    if (screen === S.MAP) state.zone = null;
+    if (screen === S.MAP) { state.zone = null; state.selection = []; }
   }
 
   /** Loading leaves when the map is ready AND the ring has been on screen long enough. */
@@ -130,7 +131,7 @@
 
   bus.on(E.PLAN_SAVED, p => {
     if (state.screen !== S.PLANS || !state.zone) return;
-    state.job = { zone: state.zone, planId: (p && p.planId) || null, step: 1 };
+    state.job = { zone: state.zone, zones: state.selection.slice(), planId: (p && p.planId) || null, step: 1 };
     handoff(R.OPERATOR);
   });
   bus.on(E.REQUEST_SAVED, () => {
@@ -155,6 +156,7 @@
   bus.on(E.ZONE_SELECTED, p => {
     if (state.screen !== S.MAP && state.screen !== S.AREA) return;
     state.zone = (p && p.zone) || null;
+    state.selection = state.zone ? ((p.zones && p.zones.length) ? p.zones : [state.zone]) : [];
     if (state.zone) show(S.AREA);
   });
 
@@ -182,7 +184,7 @@
     const seed = { operator: [R.OPERATOR, 1], procurement: [R.PROCUREMENT, 2], final: [R.PROCUREMENT, 3] }[jump];
     if (seed && SPILE.data) {
       state.stage = seed[0];
-      state.job = { zone: SPILE.data.getDemoZone(), planId: 'optimized', step: seed[1] };
+      state.job = { zone: SPILE.data.getDemoZone(), zones: [SPILE.data.getDemoZone()], planId: 'optimized', step: seed[1] };
     }
     show(ORDER.includes(jump) ? jump : S.LOGIN);
   }

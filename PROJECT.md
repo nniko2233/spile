@@ -123,8 +123,22 @@ and turns a quarter (the map becomes 3D), then zooms onto one hillside.
 Risk zones drawn as extruded colored polygons from `data/zones.geojson`:
 green = `cls` basso, amber = medio, red = alto. Clicking a red zone opens screen 6.
 
-Also on the map, per the UI rules above: the "demo data" label, and a pin with a
-progress ring on any zone that has a plan selected (ring at step 1, Plan).
+Also on the map, per the UI rules above: the "demo data" label, and the pin with
+its progress ring once a plan is saved.
+
+**Selecting areas.** A plan is made for a selection, not for one area (storyboard
+decision 1). Three ways in, all ending in the same panel:
+
+- click a red area: a selection of one. With the panel open, clicking another
+  red area adds it; clicking a selected one takes it out again;
+- **Lasso** (bottom of the map): the next drag draws a loop and every red area
+  whose centre falls inside is selected. Esc cancels;
+- **Whole region**: every red area of the block (196).
+
+These two buttons are the only controls on the map. Selected areas are outlined
+and raised. The first zone of a selection is its primary zone (the demo zone if
+it is in, else the highest score): the camera frames the whole selection, the
+pin and the job hang on the primary zone.
 
 ### 6. Area panel
 A side panel scrolling through four blocks, and nothing else, plus one action
@@ -143,6 +157,12 @@ screen 7.
    OPEX.
 4. **Scenario analysis** — what emergency maintenance costs if nothing is done:
    the expected annual loss, plus the cost of a single wildfire event.
+
+For several areas the panel reads "N areas": block 1 gives the total hectares,
+the area-weighted mean slope, every line crossed, how many drain onto a
+watercourse; block 2 the worst level, every risk present, the summed fall-in
+reach and expected loss; block 3 the optimized plan with how it splits over the
+areas ("18 optimized, 6 minimum"); block 4 the sums.
 
 Reference content for the 50 ha demo zone: 50 ha broadleaf forest (chestnut and
 beech), mean slope 28%, 2 km of bare overhead 15 kV MV line crossing it, torrent
@@ -180,7 +200,15 @@ zones go back to their risk colours: nothing has been cut yet.
 The objective is printed in the UI, one line:
 *minimize annualized cost subject to residual risk below the acceptance threshold.*
 
-For the 50 ha demo zone the numbers must come out exactly like this:
+For a selection of several areas the rows are sums over the areas, and the
+threshold is the sum of their thresholds. No action, minimum and maximum apply
+one plan to all of them. **The optimized row gives each area its own plan**: the
+cheapest total that keeps the total residual risk under the total threshold. It
+is by construction never dearer than an acceptable row, and its label says how
+it splits. Toggling it on the map colours each selected area by its own plan.
+
+For the 50 ha demo zone, selected alone, the numbers must come out exactly like
+this:
 
 | Plan | CAPEX | Residual risk | Annualized cost | Status |
 |---|---|---|---|---|
@@ -275,9 +303,18 @@ the "Cleared" state (04, map and pin rules).
 
 ## Economic model — there is no solver
 
-There is **no optimization at runtime and no solver dependency anywhere**. The UI
-says MILP; the plans are precomputed. If asked, the honest answer is: the
-optimization is formulated, the demo serves precomputed plans.
+There is **no solver dependency anywhere**. The UI says MILP; the four plans of
+every zone are precomputed. If asked, the honest answer is: the optimization is
+formulated, the demo serves precomputed plans per area and, for a selection of
+several areas, assembles the optimized row from them in the browser.
+
+That assembly is `SPILE.data.getSelectionPlans(ids)` in `app/data/store.js`: one
+of the four precomputed plans per area, minimizing total annualized cost subject
+to total residual risk <= total threshold. It relaxes the constraint with a
+multiplier and bisects on it (a few lines of plain JS, a heuristic for a
+multiple-choice knapsack, not a MILP solver), then keeps the cheapest of that
+and any single plan applied everywhere. For one area it returns that area's
+entry of `plans.json` untouched.
 
 `opt/make_plans.py` is plain Python — no PuLP, no scipy — and writes
 `data/plans.json` for every zone in `zones.geojson` from the formulas below.
@@ -563,3 +600,12 @@ Append-only. One line each: what was decided, why.
   assignment opens from the row, as spec 03 says, not from a separate question.
 - **2026-11-15** The job estimate is computed from quantities and unit rates
   (19,800 €), so the numbers on the request, the assignment and the dashboard agree.
+- **2026-11-15** (Kurt) Selection is multiple: click to add, Lasso, Whole region.
+  One click on one area read as "you can only ever pick one". The two buttons
+  are the only controls on the map; "compass only" no longer holds.
+- **2026-11-15** For a selection the optimized row is a per-area mix assembled in
+  the browser from the precomputed plans (Lagrangian bisection, no solver). The
+  alternative, summing the "optimized" plan of every area, hid what an optimizer
+  is for: 18 areas need the full plan, 6 only the minimum.
+- **2026-11-15** The 50 ha anchor table holds for the demo zone selected alone.
+  A lasso that includes it adds the real zones around it to the totals.
