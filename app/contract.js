@@ -21,6 +21,9 @@ SPILE.SCREENS = Object.freeze({
   MAP: 'map',                  // 5. 3D map, nothing else on screen
   AREA: 'area',                // 6. area panel over the map
   PLANS: 'plans',              // 7. plan comparison, map shrunk on top
+  OPERATOR: 'operator',        // 8. regional operator: the pin, the cutting request
+  PROCUREMENT: 'procurement',  // 9. procurement: assignment pop-up, dashboard
+  FINAL: 'final',              // 10. three roles side by side, one pin
 });
 
 SPILE.ROLES = Object.freeze({
@@ -50,7 +53,17 @@ SPILE.EVENTS = Object.freeze({
   PLAN_SELECTED: 'plan:selected',   // {zoneId, planId}    ui -> map  (recolor)
   PLAN_CLEARED: 'plan:cleared',     // {}                  ui -> map
   SCREEN_BACK: 'screen:back',       // {}                  ui -> shell  (plans -> area, area -> map, auth -> login)
+  // The job cycle after the plan: Plan -> Request -> Procurement, one pin all the way.
+  PLAN_SAVED: 'plan:saved',         // {zoneId, planId}    ui -> shell, map  (pin, ring step 1; then role picker, operator)
+  PIN_CLICKED: 'pin:clicked',       // {zoneId}            map -> ui
+  REQUEST_SAVED: 'request:saved',   // {zoneId}            ui -> shell, map  (ring step 2; then role picker, procurement)
+  JOB_ASSIGNED: 'job:assigned',     // {zoneId}            ui -> shell, map  (ring step 3, partly full)
+  FINAL_OPEN: 'final:open',         // {}                  ui -> shell  (procurement -> final)
+  PRESENTER_NEXT: 'presenter:next', // {screen}            shell -> ui  (PageDown on plans, operator, procurement)
 });
+
+/** The three steps of the ring on a pin. Ring = progress, never risk. */
+SPILE.PIN_STEPS = Object.freeze(['Plan', 'Request', 'Procurement']);
 
 /** Minimal event bus. Owned by A, used by both. */
 SPILE.bus = (() => {
