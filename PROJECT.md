@@ -422,7 +422,7 @@ renders into the sections and never switches them itself.
 
 ```
 login --role:picked--> auth --auth:done--> questionnaire --survey:done-->
-loading --(map:ready, held at least 4.2 s, at most 16 s)--> map
+loading --(map:ready, held at least 1 s, at most 16 s)--> map
 map --zone:selected--> area --plans:open--> plans
 zone:cleared returns to map; screen:back steps plans -> area -> map.
 
@@ -632,3 +632,6 @@ Append-only. One line each: what was decided, why.
   change. MapLibre alone missed a resize made while the stage was hidden.
 - **2026-11-15** In windows under 620 px high the map band of screen 7 is 34vh,
   not 42vh, so the four plan rows fit without scrolling.
+- **2026-11-15** Niko: 5 s from "Build the risk map" to the map at rest. Loading
+  is held 1 s, one turn of the ring (was 4.2 s); the intro is 2.4 s orbit + 1.6 s
+  dive (was 4.0 + 2.6). Supersedes the two timing decisions above.

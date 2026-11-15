@@ -54,7 +54,7 @@
     const classColor = ['match', ['get', 'cls'],
       'alto', SPILE.CLASS_COLOR.alto, 'medio', SPILE.CLASS_COLOR.medio, SPILE.CLASS_COLOR.basso];
     const color = ['to-color', ['coalesce', ['feature-state', 'col'], classColor]];
-    const fade = { duration: 1600, delay: 0 };
+    const fade = { duration: 1000, delay: 0 };
 
     map.addLayer({
       id: 'zones-fill', type: 'fill', source: 'zones',

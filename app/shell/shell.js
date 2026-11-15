@@ -29,7 +29,7 @@
   const MAP_SCREENS = new Set([S.MAP, S.AREA, S.PLANS, S.OPERATOR, S.PROCUREMENT, S.FINAL]);
   const HANDOFF_MS = 2400;       // time to watch the ring segment fill before the role picker returns
 
-  const LOADING_MIN_MS = 4200;   // long enough to read the pi ring
+  const LOADING_MIN_MS = 1000;   // one turn of the loading ring (Niko: 1 s loading + 4 s map = 5 s)
   const LOADING_MAX_MS = 16000;  // never strand the demo on a slow network
 
   const params = new URLSearchParams(location.search);

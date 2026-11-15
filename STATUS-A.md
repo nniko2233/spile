@@ -60,3 +60,12 @@ For B:
 - main.css, small-window block: screen 7 uses `--spile-plans-map-h: 34vh` and tighter rows so all four plans fit at 560 px height; under 1100 px "Save plan" sits at the right end of the header, clear of the threshold label.
 - Not checked in a small window: operator and procurement pop-ups (sticky footer is in, unseen), the final three-role view.
 Blocked on: nothing
+
+## 2026-11-15 09:21 — 5 s from "Build the risk map" to the map (asked by Niko)
+Touched: app/shell/shell.js, app/map/camera.js, app/map/zones.js, index.html, app/styles/main.css (yours), PROJECT.md
+For B:
+- shell.js: LOADING_MIN_MS 1000 (was 4200). main.css: `.pi-arc` turns once a second (was 2.4 s), so the loading screen is exactly one turn.
+- camera.js: ORBIT_MS 2400 + DIVE_MS 1600 = 4 s (were 4000 + 2600); zones start to appear 0.3 s in. zones.js: fade-in 1.0 s (was 1.6). index.html: the stage fades in over 0.8 s (was 1.8).
+- NOT measured: the browser pane was in the background, where animations do not run. The served files are the new ones.
+- `?auto` is unaffected: it waits on screen changes, not on fixed times.
+Blocked on: nothing
