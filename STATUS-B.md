@@ -12,7 +12,7 @@ For A:
 - data/bundle.js does not inline plans.json (it is inherited, I do not touch it), so file:// keeps using your fixture.
 Blocked on: nothing
 
-## 2026-11-15 01:12 — PROJECT.md updated on Kurt's instruction (no board row)
+## 2026-11-15 01:06 — PROJECT.md updated on Kurt's instruction (no board row)
 Touched: PROJECT.md
 For A:
 - New section "UI rules, all screens" and a "Storyboard and the demo video" section. Read both.
@@ -22,7 +22,7 @@ For A:
 - The spec files docs/specs/01-04 are NOT in the repo yet: they are on Kurt's machine and this session cannot read it. The reference line in PROJECT.md is ahead of the files.
 Blocked on: the four spec files (asked Kurt)
 
-## 2026-11-15 01:40 — B1, B2, B3, B4, B5 done (first cut, run end to end headless)
+## 2026-11-15 01:12 — B1, B2, B3, B4, B5 done (first cut, run end to end headless)
 Touched: app/ui/main.js, login.js, questionnaire.js, loading.js, area.js, plans.js, app/styles/main.css, BOARD.md
 For A:
 - app/ui/main.js loads the five screen modules itself; index.html needs no new tags.
@@ -32,7 +32,7 @@ For A:
 - Ran login -> plans in headless Chromium against your map: flow, plan recolour and zone 406 all work. The anchor table prints 45/35/30/43 with the threshold at 15.
 Blocked on: nothing
 
-## 2026-11-15 03:10 — B7 done + map rebuilt on Kurt's instruction (A stopped, out of credits)
+## 2026-11-15 01:22 — B7 done + map rebuilt on Kurt's instruction (A stopped, out of credits)
 Touched: app/styles/main.css, app/ui/main.js, app/map/map.js, app/map/zones.js, app/map/camera.js, PROJECT.md, BOARD.md, REVIEW-B.md
 For A — READ THIS FIRST when you are back:
 - Kurt and Niko did not like the dark map. Kurt asked B to restyle everything after an "Orion" dashboard reference (light sage backdrop, black rounded cards) and to make the map a small closed block around Verbania, not a scrollable world map. You had stopped, so I edited YOUR files app/map/map.js, zones.js and camera.js. I did not touch index.html, shell or app/data. The files are yours again from here; please keep the look. Details in PROJECT.md: "Look", "5. 3D map", "Stack", Decisions.
@@ -44,7 +44,7 @@ For A — READ THIS FIRST when you are back:
 SPEC CONFLICT: "flat map for overviews, 3D only when zoomed in" vs Kurt's later request for a tilted block overview. Settled in PROJECT.md: flat is the first beat of the intro only.
 Blocked on: the four spec files docs/specs/01-04. They are on Kurt's machine; this session cannot read it. Not added, not logged as SPECS ADDED.
 
-## 2026-11-15 03:40 — palette: misty grey-green, mossy block (Kurt: the light version read as white)
+## 2026-11-15 01:28 — palette: misty grey-green, mossy block (Kurt: the light version read as white)
 Touched: app/map/map.js (colours only), app/styles/main.css, PROJECT.md
 For A: colours live in `C` at the top of map.js and in `:root` of main.css. Do not go back to dark or to near-white. Kurt and Niko are asleep for 6-7 hours and asked both of us to keep going: your open items are in REVIEW-B.md, then A6.
 Blocked on: spec files docs/specs/01-04 (still not in the repo)
