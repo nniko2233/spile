@@ -46,11 +46,11 @@ SPILE.EVENTS = Object.freeze({
   SURVEY_DONE: 'survey:done',       // {answers}           ui -> shell
   MAP_READY: 'map:ready',           // {}                  map -> all
   INTRO_DONE: 'intro:done',         // {}                  map -> shell
-  ZONE_SELECTED: 'zone:selected',   // {zone}  full Zone   map -> ui
+  ZONE_SELECTED: 'zone:selected',   // {zone, zones}       map -> ui   zone = the primary Zone, zones = the whole selection (>= 1)
   ZONE_CLEARED: 'zone:cleared',     // {}                  ui -> map
   PLANS_OPEN: 'plans:open',         // {zoneId}            ui -> shell
   PLAN_HOVER: 'plan:hover',         // {zoneId, planId}    ui -> map
-  PLAN_SELECTED: 'plan:selected',   // {zoneId, planId}    ui -> map  (recolor)
+  PLAN_SELECTED: 'plan:selected',   // {zoneId, planId, planByZone?}  ui -> map  (recolor; planByZone overrides planId per zone)
   PLAN_CLEARED: 'plan:cleared',     // {}                  ui -> map
   SCREEN_BACK: 'screen:back',       // {}                  ui -> shell  (plans -> area, area -> map, auth -> login)
   // The job cycle after the plan: Plan -> Request -> Procurement, one pin all the way.
@@ -60,6 +60,10 @@ SPILE.EVENTS = Object.freeze({
   JOB_ASSIGNED: 'job:assigned',     // {zoneId}            ui -> shell, map  (ring step 3, partly full)
   FINAL_OPEN: 'final:open',         // {}                  ui -> shell  (procurement -> final)
   PRESENTER_NEXT: 'presenter:next', // {screen}            shell -> ui  (PageDown on plans, operator, procurement)
+  // Selecting several areas at once.
+  LASSO_START: 'lasso:start',       // {}                  ui -> map  (next drag on the map draws a loop)
+  LASSO_END: 'lasso:end',           // {count}             map -> ui  (loop closed or cancelled; count of areas inside)
+  REGION_SELECT: 'region:select',   // {}                  ui -> map  (select every red area)
 });
 
 /** The three steps of the ring on a pin. Ring = progress, never risk. */
@@ -136,6 +140,12 @@ SPILE.PLAN_IDS = Object.freeze(['no_action', 'minimum', 'optimized', 'maximum'])
  */
 
 /**
+ * A selection of several zones is priced by SPILE.data.getSelectionPlans(ids):
+ * the same ZonePlans shape with the money summed over the zones, plus
+ * `zone_ids`, `count`, and on the optimized plan `planByZone` {zoneId: planId}
+ * and `mix` {planId: number of zones}, because the optimized plan of a selection
+ * gives each zone its own plan.
+ *
  * data/plans.json shape:
  *   { generated_at: ISO string, params: {...econ constants...},
  *     zones: { "<zone_id>": ZonePlans, ... } }
