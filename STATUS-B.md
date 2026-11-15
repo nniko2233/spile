@@ -131,3 +131,10 @@ Blocked on: nothing
 Touched: app/ui/area.js, PROJECT.md
 For A: the swipe / scroll trigger on the area panel is gone. `plans:open` is emitted only by the "Create plan for selected areas" button (and by PageDown through the shell).
 Blocked on: nothing
+
+## 2026-11-15 — phone layout, for the QR code on the closing slide
+Touched: app/styles/main.css, PROJECT.md
+For A: none of your files changed. One `@media (max-width: 640px)` block at the end of main.css (plus a short-phone variant). It sets `--spile-area-w: 0px` and `--spile-plans-map-h: 30vh`, which camera.js already reads, and on screen 6 it translates `#stage` up 28vh (and `#compass` back down) so the selection sits above the bottom sheet.
+- Ran headless with `?auto=fast` at 390×844, 360×640 and 1440×900: full flow to screen 10, no page errors, no horizontal overflow.
+- The QR code points at https://nniko2233.github.io/spile/ and only works once the repo is public and GitHub Pages serves `main` from the root (owner setting, Niko).
+Blocked on: Niko making the repo public and turning on Pages

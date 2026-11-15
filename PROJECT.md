@@ -635,3 +635,13 @@ Append-only. One line each: what was decided, why.
 - **2026-11-15** Niko: 5 s from "Build the risk map" to the map at rest. Loading
   is held 1 s, one turn of the ring (was 4.2 s); the intro is 2.4 s orbit + 1.6 s
   dive (was 4.0 + 2.6). Supersedes the two timing decisions above.
+- **2026-11-15** Kurt: the demo must open from a QR code on the closing slide, so
+  it has a portrait phone layout (screens up to 640 px wide), all in one media
+  block at the end of `app/styles/main.css`. Panels become bottom sheets: screen 6
+  sets `--spile-area-w: 0px` and lifts the map 28vh so the selection sits above the
+  sheet; screen 7 uses a 30vh map band (24vh under 700 px high) and stacks each
+  plan row as label and total over a full-width bar, so the threshold line still
+  crosses every bar; the pop-up steps become a strip of numbers; screen 10 stacks
+  the three views. "Demo data" moves to the top left on a phone, because every
+  bottom edge is a sheet. Nothing changes above 640 px. Landscape phones get the
+  desktop layout.

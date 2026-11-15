@@ -658,3 +658,134 @@ tr.is-assigned td { animation: row-flash 1.6s ease; }
   .screen .plan-row { padding: 5px 0; } .plan-track { height: 22px; } .plan-total b { font-size: 19px; }
   .area-scroll { padding: 22px 20px 20px; } .area-head h1 { font-size: 28px; }
 }
+
+/* ------------------------------------------------------------- phones */
+
+/* Portrait phones: this is where the QR code on the closing slide lands. Last in
+   the file so it wins. Nothing here touches the desktop layout. The map padding in
+   app/map/camera.js follows the two --spile-* variables, so the phone layout only
+   has to set them: the area panel becomes a bottom sheet (no right padding) and
+   the plans panel leaves a shorter map band. */
+@media (max-width: 640px) {
+  :root { --spile-area-w: 0px; --spile-plans-map-h: 30vh; --m-sheet-top: 44vh; --m-lift: 28vh; }
+
+  /* "Demo data" moves under the top bar: every bottom edge is a sheet on a phone. */
+  .demo-data, body[data-screen="plans"] .demo-data { left: 16px; top: 78px; bottom: auto; }
+  #compass { top: 16px; right: 16px; width: 46px; height: 46px; }
+  .map-tools button { height: 38px; padding: 0 13px 0 11px; gap: 7px; font-size: 11px; letter-spacing: .08em; white-space: nowrap; }
+  body[data-screen="final"] .demo-data { top: auto; bottom: 16px; }
+
+  /* 1. login: the three roles stack. */
+  #screen-login .brand { top: 18px; left: 20px; }
+  .screen .login-caption { top: 30px; right: 16px; font-size: 9px; letter-spacing: .08em; }
+  .roles { inset: 64px 10px 10px; flex-direction: column; gap: 8px; }
+  .screen .role { height: auto; min-height: 0; padding: 0 22px 44px; gap: 5px; border-radius: 22px; }
+  .role:hover, .role:focus-visible, .role.is-next { flex-grow: 1.35; }
+  .role::after { left: 22px; bottom: 34px; }
+  .role-go { left: 22px; bottom: 13px; }
+  .role-name { font-size: 27px; }
+  .role-sub { font-size: 10.5px; }
+
+  /* 3. questionnaire: the card fills the visible screen (dvh excludes the URL bar). */
+  .rq { height: 96vh; height: 96dvh; }
+  .rq-tabs { flex-wrap: wrap; }
+  .rq-swing li { grid-template-columns: 30px 108px 1fr 34px; gap: 8px; font-size: 12px; }
+  .rq-months { gap: 3px; }
+  .auth { max-height: 96vh; max-height: 96dvh; }
+
+  /* 6. area: a bottom sheet. The map is lifted so the selected area, which the
+     camera centres on the full screen, sits in the band left above the sheet. */
+  #stage { transition: opacity .8s ease, transform .9s var(--ease); }
+  #compass { transition: opacity .3s ease, transform .9s var(--ease); }
+  body[data-screen="area"] #stage { transform: translateY(calc(-1 * var(--m-lift))); }
+  body[data-screen="area"] #compass { transform: translateY(var(--m-lift)); }
+  .area-panel { top: var(--m-sheet-top); left: 8px; right: 8px; bottom: 0; width: auto; border-bottom: 0; border-radius: 24px 24px 0 0; transform: translateY(40px); }
+  /* The tools sit above the sheet, and stay there while they fade out on the way to the plans. */
+  .map-tools { bottom: auto; top: calc(var(--m-sheet-top) - 54px); }
+  body[data-screen="map"] .map-tools { top: auto; bottom: 20px; }
+  .area-head { margin-bottom: 18px; }
+  .block { padding: 18px 0 20px; gap: 12px; }
+  .facts { grid-template-columns: 96px 1fr; }
+  .figure-v { font-size: 28px; }
+
+  /* 7. plans: label and total on one line, the bar full width under them, so the
+     threshold line still crosses every bar. The text lines are opaque and sit
+     above the line: it shows on the bars only. */
+  .plans { left: 8px; right: 8px; }
+  .plans-panel { padding: 14px 14px 10px; background: #101210; border-radius: 24px 24px 0 0; --label-w: 0px; --total-w: 0px; --map-w: 0px; --gap: 0px; }
+  .plans-head { gap: 10px; }
+  .plans-head h1 { font-size: 19px; }
+  .plans-head .eyebrow { font-size: 9.5px; letter-spacing: .14em; }
+  .plans-head .icon-btn { width: 34px; height: 34px; }
+  .screen .plans-save { height: 38px; padding: 0 14px; font-size: 10.5px; letter-spacing: .08em; }
+  .plans-axis, .threshold { margin-left: 0; margin-right: 0; }
+  .plans-axis { margin-bottom: 44px; font-size: 9px; letter-spacing: .12em; }
+  .screen .plan-row { grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "label total map" "track track track"; column-gap: 0; row-gap: 5px; padding: 7px 0; }
+  .plan-label, .plan-total, .plan-map { position: relative; z-index: 2; background: #101210; align-self: stretch; justify-content: center; }
+  .plan-label { grid-area: label; padding-right: 8px; }
+  .plan-track { grid-area: track; height: 20px; }
+  .plan-total { grid-area: total; align-items: flex-end; padding-right: 10px; }
+  .plan-map { grid-area: map; }
+  .plan-row.is-on .plan-label, .plan-row.is-on .plan-total, .plan-row.is-on .plan-map { background: color-mix(in srgb, var(--accent) 9%, #101210); }
+  .plan-label b { font-size: 13.5px; }
+  .plan-label small { font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .plan-total b { font-size: 16px; }
+  .plan-total small { font-size: 10px; }
+  .plan-tag { font-size: 8.5px; letter-spacing: .1em; }
+  .plan-map small { display: none; }
+  .seg em { font-size: 10.5px; padding: 0 6px; }
+  .threshold { top: -16px; bottom: -4px; }
+  .threshold-label { font-size: 8.5px; padding: 4px 8px; letter-spacing: .08em; }
+  .threshold-label b { font-size: 10px; }
+
+  /* 8, 9. pop-ups: steps become a strip of numbers, the footer stacks. */
+  .role-chip { top: 16px; left: 16px; height: 36px; font-size: 10.5px; letter-spacing: .12em; }
+  .screen .ask { height: 50px; padding: 0 22px; }
+  .popup { width: 96vw; max-height: 94vh; max-height: 94dvh; border-radius: 22px; }
+  .popup > * { flex: none; }
+  /* Pre-filled facts: one row that scrolls sideways, title on its own line. */
+  .wz-pre { display: grid; grid-auto-flow: column; grid-auto-columns: max-content; grid-template-rows: auto auto; gap: 6px 8px; overflow-x: auto; scrollbar-width: none; }
+  .wz-pre-title { grid-row: 1; grid-column: 1 / span 12; margin-bottom: 0; }
+  .wz-pre > div { grid-row: 2; }
+  .wz-main { grid-template-columns: minmax(0, 1fr); min-height: 0; gap: 10px; }
+  .wz-rail { flex-direction: row; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; gap: 4px; }
+  .wz-rail li { flex: none; padding: 5px 6px; }
+  .wz-rail li b, .wz-rail .step-tick { display: none; }
+  .wz-rail li.is-now { padding-right: 12px; }
+  .wz-rail li.is-now b { display: inline; white-space: nowrap; }
+  .wz-pane { padding: 12px 12px 8px; border-radius: 16px; }
+  .wz-fields td { font-size: 12.5px; padding: 6px 8px 6px 0; }
+  .wz-n { display: none; }
+  .wz-l { width: 36%; }
+  .wz-t { width: 70px; }
+  .wz-t em.is-pre { padding: 2px 6px; font-size: 8.5px; }
+  .screen .wz-status { flex: 1 1 100%; max-width: 100%; margin-right: 0; overflow-x: auto; scrollbar-width: none; }
+  .wz-foot .btn { flex: 1 1 100%; }
+
+  .dash { left: 8px; right: 8px; padding: 14px 14px 12px; gap: 10px; max-height: 58vh; border-radius: 24px 24px 0 0; }
+  .dash-head { flex-wrap: wrap; gap: 8px 12px; }
+  .dash-head h2 { font-size: 20px; }
+  .dash-head .btn { height: 38px; padding: 0 14px; font-size: 10.5px; letter-spacing: .08em; margin-left: auto; }
+  .screen .dash-stats { order: 3; flex: 1 1 100%; margin-left: 0; overflow-x: auto; scrollbar-width: none; }
+  .dash-stats li { padding: 5px 10px; font-size: 10.5px; }
+  .dash-scroll { overflow: auto; min-height: 0; }
+
+  /* 10. final: the three role views stack, so the same pin is still seen three times. */
+  .views { inset: 10px 10px 40px; grid-template-columns: 1fr; grid-template-rows: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .view { border-radius: 20px; }
+  .view-top { top: 10px; left: 10px; height: 28px; padding: 0 10px 0 8px; gap: 6px; font-size: 8.5px; letter-spacing: .08em; }
+  .view-top .dot { width: 7px; height: 7px; }
+  .view-pin { width: 56px; height: 71px; margin: -61px 0 0 -28px; }
+  .view-card { left: 8px; right: 8px; bottom: 8px; padding: 9px 10px; gap: 7px; border-radius: 16px; }
+  .view-card dl { row-gap: 2px; }
+  .view-card dt { font-size: 11px; }
+  .view-card dd { font-size: 11.5px; }
+  .view-steps { gap: 5px; }
+  .view-steps li { padding: 4px 0; font-size: 8.5px; letter-spacing: .08em; }
+  .screen .final-caption { left: auto; right: 16px; bottom: 14px; text-align: right; }
+}
+/* Short phones: a thinner map band so all four plans still fit. */
+@media (max-width: 640px) and (max-height: 700px) {
+  :root { --spile-plans-map-h: 24vh; }
+  .plans-axis { margin-bottom: 40px; }
+}
