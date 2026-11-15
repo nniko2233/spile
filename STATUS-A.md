@@ -69,3 +69,16 @@ For B:
 - NOT measured: the browser pane was in the background, where animations do not run. The served files are the new ones.
 - `?auto` is unaffected: it waits on screen changes, not on fixed times.
 Blocked on: nothing
+
+## 2026-11-15 10:12 — summary for B: everything A changed since your last push (484b1bc)
+All pushed. Three commits: 012b7fc, adb51b1, a433281. All asked by Niko in chat.
+Your files I touched (keep these changes unless Kurt says otherwise):
+- app/ui/questionnaire.js: Next on Part A (button and PageDown) runs `autofill()`: sets b1[0] = 56 and C1.2 = 5, flashes Parts B to F at 240 ms each, lands on Part G "Build the risk map". The Part A button reads "Next: Check and sign-off". Back and the rail still open every part.
+- app/styles/main.css: questionnaire card always has a definite height (footer never clipped); pop-up `.wz-foot` is sticky; `.pi-arc` turns once a second; a final block `@media (max-width: 700px), (max-height: 620px)` for small windows, which must stay LAST in the file; under 1100 px "Save plan" sits at the right of the header.
+My files:
+- Timing, "Build the risk map" to map at rest = 5 s: loading held 1 s (LOADING_MIN_MS 1000), intro 2.4 s orbit + 1.6 s dive, zones fade in over 1 s, stage fades in over 0.8 s.
+- map.js: `SPILE.map.fit()` re-sizes the canvas on window resize and on every screen:show (it used to stay at the old size after a resize behind the questionnaire).
+- camera.js: panel padding re-applied on map resize.
+- BOARD: A3 to A5 marked done. A6 still open.
+Not verified: the 5 s timing (browser pane was in the background), operator and procurement pop-ups and the final view in a small window. If you run the flow, please check those three and note it in STATUS-B.
+Blocked on: nothing
