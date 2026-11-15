@@ -1,0 +1,307 @@
+{
+ "generated_at": "2026-11-14T21:59:09+00:00",
+ "comune": "Verbania",
+ "istat": "103072",
+ "grid_res_m": 10.0,
+ "coverage": {
+  "area_ha": 3746,
+  "forest_ha": 1362,
+  "forest_pct": 36.4,
+  "km_network": {
+   "power_hv": 48.1,
+   "power_mv": 0.0,
+   "rail": 22.0,
+   "road": 87.1
+  },
+  "km_network_total": 157.2,
+  "buildings": 19286,
+  "cells_analysed": 136163,
+  "last_image": {
+   "worldcover": "2021",
+   "canopy": "2020 (Meta/WRI v1, imm. 2018-2020)",
+   "dem": "Copernicus GLO-30 (2021 release)",
+   "osm": "2026-11-14T17:42:21Z"
+  }
+ },
+ "zones": {
+  "total": 443,
+  "by_class": {
+   "alto": 196,
+   "medio": 247,
+   "basso": 0
+  },
+  "by_type": {
+   "power": 71,
+   "rail": 1,
+   "road": 72,
+   "fire": 297,
+   "hydro": 59
+  },
+  "by_type_high": {
+   "power": 29,
+   "rail": 1,
+   "road": 8,
+   "fire": 166,
+   "hydro": 29
+  },
+  "cells": 25460,
+  "previous_total": 458,
+  "delta": -15,
+  "previous_at": "2026-11-14T18:03:20+00:00"
+ },
+ "fascia": {
+  "cells_out": 308,
+  "cells_in": 1504,
+  "cells_out_all": 1070,
+  "cells_in_all": 2462,
+  "pct_out_all": 30.3,
+  "ha_out_all": 10.7,
+  "cells_fall_total": 1812,
+  "pct_out": 17.0,
+  "zones_out": 42,
+  "zones_in": 114,
+  "ha_out": 3.1
+ },
+ "exposed": {
+  "power_hv": {
+   "segments": 352,
+   "km": 8.8,
+   "segments_total": 1927,
+   "km_total": 48.1
+  },
+  "power_mv": {
+   "segments": 0,
+   "km": 0.0,
+   "segments_total": 0,
+   "km_total": 0.0
+  },
+  "rail": {
+   "segments": 31,
+   "km": 0.78,
+   "segments_total": 922,
+   "km_total": 22.0
+  },
+  "road": {
+   "segments": 509,
+   "km": 12.72,
+   "segments_total": 3808,
+   "km_total": 87.1
+  },
+  "hydro": {
+   "segments": 59,
+   "plants": 7,
+   "km_total": 47.0
+  }
+ },
+ "slope_hist": {
+  "bins": [
+   0,
+   10,
+   20,
+   30,
+   40,
+   50,
+   90
+  ],
+  "counts": [
+   3070,
+   6015,
+   9607,
+   5974,
+   1083,
+   26
+  ]
+ },
+ "top_segments": [
+  {
+   "group": "power",
+   "seg": "w305111904#453",
+   "cls": "power_hv",
+   "type": "Linea AT 132 kV",
+   "name": "23.044",
+   "operator": "",
+   "score": 0.7,
+   "cells": 13,
+   "cells_out": 1,
+   "h_mean": 20.2
+  },
+  {
+   "group": "power",
+   "seg": "w305111904#451",
+   "cls": "power_hv",
+   "type": "Linea AT 132 kV",
+   "name": "23.044",
+   "operator": "",
+   "score": 0.7,
+   "cells": 11,
+   "cells_out": 2,
+   "h_mean": 20.5
+  },
+  {
+   "group": "power",
+   "seg": "w305111904#454",
+   "cls": "power_hv",
+   "type": "Linea AT 132 kV",
+   "name": "23.044",
+   "operator": "",
+   "score": 0.7,
+   "cells": 9,
+   "cells_out": 1,
+   "h_mean": 20.4
+  },
+  {
+   "group": "power",
+   "seg": "w305111904#455",
+   "cls": "power_hv",
+   "type": "Linea AT 132 kV",
+   "name": "23.044",
+   "operator": "",
+   "score": 0.7,
+   "cells": 9,
+   "cells_out": 0,
+   "h_mean": 17.8
+  },
+  {
+   "group": "power",
+   "seg": "w305111904#452",
+   "cls": "power_hv",
+   "type": "Linea AT 132 kV",
+   "name": "23.044",
+   "operator": "",
+   "score": 0.7,
+   "cells": 7,
+   "cells_out": 0,
+   "h_mean": 16.7
+  },
+  {
+   "group": "power",
+   "seg": "w305111904#449",
+   "cls": "power_hv",
+   "type": "Linea AT 132 kV",
+   "name": "23.044",
+   "operator": "",
+   "score": 0.683,
+   "cells": 9,
+   "cells_out": 0,
+   "h_mean": 20.8
+  },
+  {
+   "group": "power",
+   "seg": "w305111904#444",
+   "cls": "power_hv",
+   "type": "Linea AT 132 kV",
+   "name": "23.044",
+   "operator": "",
+   "score": 0.675,
+   "cells": 9,
+   "cells_out": 2,
+   "h_mean": 17.6
+  },
+  {
+   "group": "power",
+   "seg": "w305111905#012",
+   "cls": "power_hv",
+   "type": "Linea AT 132 kV",
+   "name": "23.041",
+   "operator": "",
+   "score": 0.649,
+   "cells": 13,
+   "cells_out": 4,
+   "h_mean": 18.8
+  },
+  {
+   "group": "power",
+   "seg": "w305111904#448",
+   "cls": "power_hv",
+   "type": "Linea AT 132 kV",
+   "name": "23.044",
+   "operator": "",
+   "score": 0.638,
+   "cells": 6,
+   "cells_out": 1,
+   "h_mean": 16.5
+  },
+  {
+   "group": "power",
+   "seg": "w305111904#450",
+   "cls": "power_hv",
+   "type": "Linea AT 132 kV",
+   "name": "23.044",
+   "operator": "",
+   "score": 0.636,
+   "cells": 11,
+   "cells_out": 0,
+   "h_mean": 16.6
+  }
+ ],
+ "ticker": {
+  "high_zones": 196
+ },
+ "model": {
+  "fascia_m": {
+   "power_hv": 15.0,
+   "power_mv": 10.0,
+   "rail": 6.0,
+   "road": 6.0
+  },
+  "w_asset": {
+   "power_hv": 1.0,
+   "power_mv": 0.75,
+   "rail": 0.9,
+   "road_trunk": 0.7,
+   "road_primary": 0.6,
+   "road_secondary": 0.5
+  },
+  "class_high": 0.45,
+  "class_med": 0.2,
+  "in_fascia_factor": 0.7,
+  "canopy_fallback": false,
+  "canopy_fallback_height": 20.0
+ },
+ "sources": {
+  "osm_overpass": {
+   "ok": true,
+   "label": "OpenStreetMap / Overpass",
+   "detail": "5169 asset, 19286 edifici"
+  },
+  "esa_worldcover": {
+   "ok": true,
+   "label": "ESA WorldCover 10 m",
+   "detail": "classe 10 = tree cover, 2021"
+  },
+  "canopy_height": {
+   "ok": true,
+   "label": "Canopy height (Meta/WRI 1 m)",
+   "detail": "letto a 2.5 m, max su 10 m"
+  },
+  "copernicus_dem": {
+   "ok": true,
+   "label": "Copernicus DEM GLO-30",
+   "detail": "pendenza ed esposizione"
+  },
+  "catasto_ade": {
+   "ok": true,
+   "label": "Catasto AdE (WMS INSPIRE)",
+   "detail": "50 zone con particella, 70 senza"
+  },
+  "basemap": {
+   "ok": true,
+   "label": "Basemap OpenFreeMap + terreno AWS",
+   "detail": "CARTO richiede ora una API key"
+  },
+  "sentinel2": {
+   "ok": false,
+   "label": "Sentinel-2 NDVI/NDWI",
+   "detail": "opzionale, non integrato"
+  },
+  "osm_mt_lines": {
+   "ok": false,
+   "label": "Linee MT in OSM",
+   "detail": "rete MT e-distribuzione non mappata"
+  }
+ },
+ "catasto": {
+  "zones_with_parcel": 50,
+  "zones_queried": 120
+ }
+}
