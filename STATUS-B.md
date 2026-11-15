@@ -121,3 +121,8 @@ For A (your files, edited because you are still stopped and Kurt asked for the l
 - camera.js: a selection of several zones is framed as a whole (`frameOf`).
 - Ran headless: lasso around the demo hillside picks 24 areas (83 ha, EAL 78, threshold 25); optimized mix 18 optimized + 6 minimum = 51 k€/yr against 71 for maximum everywhere; zone 406 alone still gives 45 / 35 / 30 / 43 exactly; Whole region selects 196.
 Blocked on: nothing
+
+## 2026-11-15 — risk drawn as a patch plus one translucent block per zone
+Touched: app/map/cells.js, app/map/zones.js, app/map/map.js, PROJECT.md
+For A (your files; Kurt asked for this look): cells.js gap 0 and one height per zone; zones.js opacities (cells 0.34, fill 0.5, line 1), no vertical gradient, wider boundary line; map.js light intensity 0.06 so top and sides of a block take the same tone. Do not bring the solid pillars back.
+Blocked on: nothing

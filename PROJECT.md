@@ -120,8 +120,13 @@ screen besides the map: a compass, top right, and the "demo data" label.
 Short automatic intro on entry: the block seen flat from above, then it tilts
 and turns a quarter (the map becomes 3D), then zooms onto one hillside.
 
-Risk zones drawn as extruded colored polygons from `data/zones.geojson`:
-green = `cls` basso, amber = medio, red = alto. Clicking a red zone opens screen 6.
+Risk zones from `data/zones.geojson`, green = `cls` basso, amber = medio, red =
+alto, drawn in three layers: a **continuous patch** draped on the terrain (50%
+opacity), its **boundary** as a solid line, and above it **one see-through block
+per zone** (34% opacity) whose height is the zone's risk. The block is made of
+touching 20 m cells of equal height so that it follows the slope, and the light
+is nearly flat so that it reads as one volume. No separate bars. Clicking a red
+zone opens screen 6.
 
 Also on the map, per the UI rules above: the "demo data" label, and the pin with
 its progress ring once a plan is saved.
@@ -609,3 +614,6 @@ Append-only. One line each: what was decided, why.
   is for: 18 areas need the full plan, 6 only the minimum.
 - **2026-11-15** The 50 ha anchor table holds for the demo zone selected alone.
   A lasso that includes it adds the real zones around it to the totals.
+- **2026-11-15** (Kurt) Risk is a draped patch with a boundary and one
+  translucent block per zone, not solid pillars: a field of bars rising from the
+  ground was too busy, and solid red hid the terrain under it.

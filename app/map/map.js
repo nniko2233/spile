@@ -199,7 +199,9 @@
         } catch (err) { console.info('[map] no sky in this MapLibre build'); }
       }
 
-      map.setLight({ anchor: 'viewport', color: '#ffffff', intensity: 0.32, position: [1.25, 215, 38] });
+      // Nearly flat light: the top and the sides of a risk block take the same tone,
+      // so a block on a slope reads as one volume and not as a staircase of faces.
+      map.setLight({ anchor: 'viewport', color: '#ffffff', intensity: 0.06, position: [1.25, 215, 38] });
 
       addContext();
       collapse();

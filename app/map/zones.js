@@ -19,7 +19,9 @@
   const E = SPILE.EVENTS, S = SPILE.SCREENS, bus = SPILE.bus, D = SPILE.data;
 
   const CELL_M = 20;
-  const OPACITY = { cells: 0.9, fill: 0.28, line: 0.9 };
+  // Risk is first a continuous patch draped on the terrain, with its boundary;
+  // the block above it is see-through and only adds the height.
+  const OPACITY = { cells: 0.34, fill: 0.5, line: 1 };
 
   const hexToRgb = hex => {
     const n = parseInt(hex.replace('#', ''), 16);
@@ -64,7 +66,7 @@
       layout: { 'line-join': 'round' },
       paint: {
         'line-color': color, 'line-opacity': 0, 'line-opacity-transition': fade,
-        'line-width': ['interpolate', ['linear'], ['zoom'], 11, 0.5, 15, 1.6], 'line-blur': 0.4,
+        'line-width': ['interpolate', ['linear'], ['zoom'], 11, 0.8, 15, 2.4], 'line-blur': 0,
       },
     }, before);
 
@@ -75,7 +77,7 @@
         // k is 0..1, raised while a zone is hovered or selected.
         'fill-extrusion-height': ['*', ['get', 'h'], ['+', 1, ['*', 1.3, ['to-number', ['feature-state', 'k']]]]],
         'fill-extrusion-base': 0,
-        'fill-extrusion-vertical-gradient': true,
+        'fill-extrusion-vertical-gradient': false,
         'fill-extrusion-opacity': 0, 'fill-extrusion-opacity-transition': fade,
       },
     }, before);

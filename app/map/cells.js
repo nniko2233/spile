@@ -1,5 +1,8 @@
 /**
- * Zone polygons -> terrain-following pillars. Owned by Agent A.
+ * Zone polygons -> one terrain-following block per zone. Owned by Agent A;
+ * changed by Agent B (Kurt, 2026-11-15): the cells of a zone touch and all have
+ * the same height, so a zone reads as a single raised block whose height is its
+ * risk, not as a field of separate bars.
  *
  * MapLibre lifts a fill-extrusion to the terrain height of the feature's centroid,
  * so one flat slab per zone floats on one side of a 30 degree slope and sinks on
@@ -43,7 +46,7 @@
 
   SPILE.buildCells = (zonesFC, opts = {}) => {
     const size = opts.size || 20;            // cell edge, metres
-    const gap = opts.gap == null ? 0.07 : opts.gap; // inset per side, share of the cell
+    const gap = opts.gap == null ? 0 : opts.gap;    // inset per side, share of the cell; 0 = cells touch
 
     const feats = zonesFC.features;
     const lat0 = feats.length ? feats.reduce((s, f) => s + f.properties.lat, 0) / feats.length : 45.94;
@@ -81,10 +84,8 @@
       const H = zoneHeight(p);
       const ids = [];
       cells.forEach(([i, j]) => {
-        // Edge cells are lower than interior ones: the zone reads as a mound.
-        const n = cells.has((i + 1) + ':' + j) + cells.has((i - 1) + ':' + j)
-                + cells.has(i + ':' + (j + 1)) + cells.has(i + ':' + (j - 1));
-        const h = Math.round(H * (0.58 + 0.42 * n / 4) * 10) / 10;
+        // One height for the whole zone: its top runs parallel to the ground.
+        const h = Math.round(H * 10) / 10;
 
         const ax = (i + gap) * dLon, bx = (i + 1 - gap) * dLon;
         const ay = (j + gap) * dLat, by = (j + 1 - gap) * dLat;
