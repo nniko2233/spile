@@ -103,3 +103,10 @@ For A:
 - zones.js: pin body path only (head centred on the ring).
 SPEC CONFLICT (kept PROJECT.md): 01 A9 horizon 1/3/5 years, ours 20. 01 F2 yearly budget, omitted.
 Blocked on: nothing
+
+## 2026-11-15 — Kurt's review, part 2: cutting request and procurement on specs 02 and 03
+Touched: app/ui/flow.js (rewritten), auto.js, app/styles/main.css, app/map/zones.js, camera.js, PROJECT.md
+For A:
+- zones.js: the pin catches up on screen:show for operator / procurement / final, because the map can finish loading before the shell seeds a job on a `?screen=` jump.
+- camera.js: procurement keeps 40% of the height clear at the bottom for the dashboard.
+Blocked on: nothing

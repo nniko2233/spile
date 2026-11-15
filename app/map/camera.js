@@ -139,7 +139,7 @@
     if (!job || !job.zone) return;
     if (introState !== 'done') skipIntro();
     token++;
-    const bottom = screen === S.PROCUREMENT ? Math.round(window.innerHeight * 0.34) : 0;
+    const bottom = screen === S.PROCUREMENT ? Math.round(window.innerHeight * 0.4) : 0;
     map.flyTo(Object.assign(lookAt(job.zone, { zoom: screen === S.FINAL ? 14.2 : 13.7, pitch: 56, bearing: -34 }),
       { padding: Object.assign({}, NO_PAD, { bottom }), duration: 1600, curve: 1.2, essential: true }));
   }

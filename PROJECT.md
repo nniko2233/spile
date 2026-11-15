@@ -196,20 +196,40 @@ The role picker returns with the Regional Operator card lit and the Risk Manager
 marked done; only the role whose turn it is gets in, and there is no second
 sign-in form. Then the same map, the same place, one pin whose ring shows Plan
 done, pulsing because it waits for this user. Tap the pin: **Request cutting
-job?** Tap that: the cutting request pop-up, the eight steps of
-`docs/specs/02` as eight tiles (Scope, Field check, Work needed, Timing, Safety,
-Access, Land and permits, Hand-over), three answers each, filling themselves in
-at 0.3 s per tile. **Save request**: the second ring segment fills, 2.4 s later
-the role picker returns for Procurement. No costs on this form: the operator
-gives quantities and constraints.
+job?** Tap that: the cutting request of `docs/specs/02`, built field by field:
 
-### 9. Procurement: assignment and dashboard
-Same map, same pin, two segments full. Tap the pin: **Procure resources?**, then
-the assignment pop-up, the four steps of `docs/specs/03` (Contractor, Contract
-and price, Schedule, Documents). **Send work order**: the third segment fills by
-a third, and the dashboard rises from the bottom, one row per request, where the
-row of this job turns from *In procurement* to **Assigned**. Button **All three
-roles** opens screen 10.
+- a strip of what **the platform pre-fills** before the operator types anything:
+  risk colour, the three criteria driving it, the deadline from the response
+  time of that colour (red = 30 days), corridor length and area, trees within
+  fall-in reach, last cut;
+- a rail of the **eight steps**, one screen each (Scope, Field check, Work
+  needed, Timing, Safety and asset, Access and logistics, Land permits
+  environment, Contacts and hand-over), each field with the spec's number
+  (1.1 to 8.4), its name, its answer, and a tag: *Pre-filled* where the platform
+  proposed the value, otherwise when it is required;
+- the **status flow** along the bottom (Draft, Submitted, Returned, In
+  procurement, Assigned, Work done, Verified) and the checks the form enforces.
+
+The steps play themselves fast-forward, about 0.5 s each; clicking a step in the
+rail stops the playback and opens that step. **Submit request**: the second ring
+segment fills, 2.4 s later the role picker returns for Procurement. No costs on
+this form: the operator gives quantities and constraints, not prices.
+
+### 9. Procurement: dashboard and assignment
+Same map, same pin, two segments full, and the dashboard of `docs/specs/03`
+along the bottom: one row per request, columns grouped **What** (request,
+region and asset, risk, scope, flags), **When** (window, status), **Who**
+(contractor, planned dates), **Money** (estimate, order value, order number,
+invoice), **Done** (evidence, verified), and four counters (in procurement,
+assigned, verified, invoices disputed). Three rows: this job and the two sample
+rows of the spec. The request ID opens the operator's request, read only.
+
+**Procure resources** on the row (or a tap on the pin) opens the assignment,
+steps P1 to P4 of the spec: ranked suggested contractors and the one chosen,
+contract route and price against the estimate, schedule inside the operator's
+window, documents and the purchase order number. **Send work order**: the third
+ring segment fills by a third and the row turns **Assigned**, with contractor,
+planned dates, order value and order number. **All three roles** opens screen 10.
 
 ### 10. Three roles, one pin
 Three thin views side by side, one per role, each with its accent, the same
@@ -219,8 +239,10 @@ Under each: Assigned (done), Verified and Paid (faded, still to come). Caption:
 
 The job is the same everywhere, invented, and labelled demo data: CR-0142, VCO,
 15 kV MV line, 146 trees to fell and 62 to prune over 3.2 ha, window 24 Nov to
-15 Dec, line outage 1 to 3 Dec, Forestry firm A, estimate 18,400 €, order
-17,900 €, PO-4500123. The 146 is the fall-in reach count of screen 6.
+15 Dec, line outage 1 to 3 Dec, Forestry firm A, PO-4500123. The 146 is the
+fall-in reach count of screen 6. The estimate is computed, not typed:
+(146 x 95 € + 62 x 45 € + 3.2 ha x 420 €) x 1.1 access = 19,800 €; the order is
+18,900 €. Unit rates are placeholders.
 
 ### Storyboard and the demo video
 
@@ -240,9 +262,9 @@ or a control, this file wins.
 | 7 Optimiser running | 7, the 1.2 s shimmer | yes | no "within budget": the constraint is the acceptance threshold |
 | 8 Plan result | 7, the bars | yes | bars and threshold line instead of "actions, cost, months"; Save plan fills ring step 1 |
 | 9 Role picker, operator | 1 again, operator lit | yes | |
-| 10-11 Operator map, cutting request | 8 | yes | eight tiles, scripted values |
+| 10-11 Operator map, cutting request | 8 | yes | pre-filled strip, eight steps with the spec's field numbers, status flow |
 | 12 Role picker, procurement | 1 again, procurement lit | yes | |
-| 13-14 Procurement map, assignment, dashboard | 9 | yes | four tiles, scripted values; three sample rows |
+| 13-14 Procurement map, assignment, dashboard | 9 | yes | dashboard first, "Procure resources" on the row, steps P1 to P4 |
 | 15 Split view of the three roles | 10 | yes | one still of the map shown three times, not three live maps |
 
 Not taken from the specs, on purpose: any budget field or slider (01 Part F2,
@@ -384,7 +406,7 @@ back, whatever the UI is doing. The whole demo can be driven with `PageDown`
 alone, 26 presses from the role picker to the three-role view (10 of them in
 the questionnaire): on screen 7 the
 first press shows the optimum on the map and the second saves it; on screens 8
-and 9 the presses are question, pop-up, save (then, on 9, the three-role view). `?screen=<name>` jumps to a screen and `?dev`
+the presses are question, pop-up, submit; on screen 9 pop-up, send, three-role view. `?screen=<name>` jumps to a screen and `?dev`
 labels empty screens; both are development only.
 
 ## Data
@@ -534,3 +556,10 @@ Append-only. One line each: what was decided, why.
 - **2026-11-15** Loading ring rebuilt as HTML layers animated with transform and
   opacity only. The SVG-internal animation stuttered while the map started up.
 - **2026-11-15** Pin head redrawn as a true circle on the centre the ring uses.
+- **2026-11-15** (Kurt) Cutting request and procurement rebuilt against specs 02
+  and 03 field by field: real field numbers, pre-filled markers, status flow,
+  the full dashboard columns. The first version only borrowed the step names.
+- **2026-11-15** On screen 9 the dashboard is there from the start and the
+  assignment opens from the row, as spec 03 says, not from a separate question.
+- **2026-11-15** The job estimate is computed from quantities and unit rates
+  (19,800 €), so the numbers on the request, the assignment and the dashboard agree.

@@ -333,6 +333,9 @@
   // class colours again. The work is not done yet, so the risk colour has not changed.
   bus.on(E.SCREEN_SHOW, p => {
     if (p.screen !== S.MAP && p.screen !== S.OPERATOR && p.screen !== S.PROCUREMENT && p.screen !== S.FINAL) return;
+    // The map can finish loading before the shell seeds a job (?screen=operator): catch up here.
+    const job = SPILE.state.job;
+    if (map && job && job.zone && p.screen !== S.MAP && (pinZone !== job.zone.id || pinStep !== job.step)) setPin(job.zone.id, job.step);
     clearSelection();
     if (committedPlan) showPlan(null, null);
   });
