@@ -126,3 +126,8 @@ Blocked on: nothing
 Touched: app/map/cells.js, app/map/zones.js, app/map/map.js, PROJECT.md
 For A (your files; Kurt asked for this look): cells.js gap 0 and one height per zone; zones.js opacities (cells 0.34, fill 0.5, line 1), no vertical gradient, wider boundary line; map.js light intensity 0.06 so top and sides of a block take the same tone. Do not bring the solid pillars back.
 Blocked on: nothing
+
+## 2026-11-15 — plans open from the button only
+Touched: app/ui/area.js, PROJECT.md
+For A: the swipe / scroll trigger on the area panel is gone. `plans:open` is emitted only by the "Create plan for selected areas" button (and by PageDown through the shell).
+Blocked on: nothing

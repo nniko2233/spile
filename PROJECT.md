@@ -176,8 +176,9 @@ expected annual loss **45 k€/yr**. Optimized plan **119 k€ + 10 k€/yr**. S
 wildfire event **450 k€**.
 
 ### 7. Management plans view
-The map stays visible at the top as context. The button of screen 6, or a
-**swipe down**, raises the plan comparison panel: the map shrinks to a band at
+The map stays visible at the top as context. **Only the button of screen 6**
+("Create plan for selected areas") raises the plan comparison panel; scrolling
+the area panel never does: the map shrinks to a band at
 the top and the bars for the alternative plans appear below it, one per row,
 after a 1.2 s "optimizing" shimmer.
 
@@ -617,3 +618,5 @@ Append-only. One line each: what was decided, why.
 - **2026-11-15** (Kurt) Risk is a draped patch with a boundary and one
   translucent block per zone, not solid pillars: a field of bars rising from the
   ground was too busy, and solid red hid the terrain under it.
+- **2026-11-15** (Kurt) The plans view opens from the button only. Scrolling to
+  the end of the area panel used to open it, which felt like the app deciding.

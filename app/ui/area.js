@@ -119,7 +119,7 @@
   const figure = (value, unit, label, cls) =>
     h('div.figure' + (cls ? '.' + cls : ''), null, h('span.figure-v', null, value, h('small', { text: ' ' + unit })), h('span.figure-l', { text: label }));
 
-  let panel, body, zone = null, selection = [], wheelAcc = 0, wheelT = 0, touchY = null;
+  let panel, body, zone = null, selection = [];
 
   function openPlans() { if (zone) bus.emit(E.PLANS_OPEN, { zoneId: zone.id }); }
 
@@ -171,28 +171,12 @@
     body.scrollTop = 0;
   }
 
-  /** Swipe down past the end of the panel raises the plans view. */
-  function onWheel(e) {
-    const atEnd = body.scrollTop + body.clientHeight >= body.scrollHeight - 2;
-    const now = performance.now();
-    if (!atEnd || e.deltaY <= 0) { wheelAcc = 0; return; }
-    if (now - wheelT > 500) wheelAcc = 0;
-    wheelT = now; wheelAcc += e.deltaY;
-    if (wheelAcc > 320) { wheelAcc = 0; openPlans(); }
-  }
-
   SPILE.ui.screen('area', {
     init(el) {
       body = h('div.area-scroll');
       panel = h('aside.area-panel.glass', { 'aria-label': 'Area' }, body);
       el.append(panel);
-      body.addEventListener('wheel', onWheel, { passive: true });
-      body.addEventListener('touchstart', e => { touchY = e.touches[0].clientY; }, { passive: true });
-      body.addEventListener('touchend', e => {
-        const atEnd = body.scrollTop + body.clientHeight >= body.scrollHeight - 2;
-        if (touchY != null && atEnd && e.changedTouches[0].clientY - touchY > 90) openPlans();
-        touchY = null;
-      }, { passive: true });
+      // The plans open only from the button: scrolling the panel never leaves it.
       // Clicking another red zone while the panel is open swaps its content.
       bus.on(E.ZONE_SELECTED, p => { if (p && p.zone) render(p.zones && p.zones.length ? p.zones : [p.zone]); });
       bus.on('data:plans', () => { if (zone && SPILE.state.screen === 'area') render(selection); });
