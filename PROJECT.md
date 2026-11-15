@@ -38,6 +38,15 @@ Design principle, it governs every screen: **clean and cinematic. The map carrie
 no information around it. Data appears only on click.** No sidebars, no tickers,
 no stat strips, no clocks. The old prototype failed on exactly this.
 
+### Look
+
+Light, not dark. A soft sage backdrop (`#a7afa2`, lighter towards the top), and on
+it near-black rounded cards (`#111311`, radius 28 px) with white pill buttons.
+Typeface Outfit (Google Fonts, system fallback). The only saturated colours on
+any screen are the three risk colours. Reference: the upper half of the "Orion"
+dashboard shot Kurt supplied; we borrow its palette, card segmentation and
+restraint, not its content.
+
 ### UI rules, all screens
 
 - **Colour means risk, the ring means progress. Never mixed.** Corridors and
@@ -75,10 +84,16 @@ answered, and these three drive the model:
 Animated logo, loading ring with the digits of pi scrolling along its edge.
 
 ### 5. 3D map
-Verbania in three dimensions, terrain exaggeration high enough to read the
-slopes. On screen: the map and a compass, top right. Nothing else.
+Verbania as **a closed block**: one 14 km square of terrain centred on the
+municipality, standing as a slab on the plain backdrop, like a physical model.
+Nothing is drawn outside the square and the camera cannot scroll away from it
+(`maxBounds`, min zoom 10.6). It is not a window on a world map. Terrain
+exaggeration 1.9. On the block: light ground, the lake, woods and buildings in
+pale tones, roads, the municipal boundary, the HV lines, an 8 x 8 grid. On
+screen besides the map: a compass, top right, and the "demo data" label.
 
-Short automatic intro on entry: orbit, then zoom onto one hillside.
+Short automatic intro on entry: the block seen flat from above, then it tilts
+and turns a quarter (the map becomes 3D), then zooms onto one hillside.
 
 Risk zones drawn as extruded colored polygons from `data/zones.geojson`:
 green = `cls` basso, amber = medio, red = alto. Clicking a red zone opens screen 6.
@@ -212,7 +227,13 @@ estimates, not derived from local time series. Say so if asked.
 ## Stack
 
 Vanilla JS, no framework, no build step. MapLibre GL JS from CDN. Terrain from
-AWS Terrain Tiles (terrarium). Basemap OpenFreeMap `dark`. No API keys anywhere.
+AWS Terrain Tiles (terrarium), passed through a `spdem://` protocol in
+`app/map/map.js` that sets every pixel outside the block to -140 m: that cut is
+what makes the slab. Tiles wholly outside the block are never fetched, and a
+tile that fails comes back flat, so the map starts even offline. No basemap
+style: the block's surface is our own layers, plus water, woods and buildings
+from the OpenFreeMap vector tiles when they answer (optional). No API keys
+anywhere.
 
 Run it: `python -m http.server 8765` from the repo root, then open
 `http://localhost:8765/`. Keep the tab in the foreground: MapLibre suspends
@@ -291,7 +312,7 @@ Also in `data/`: `assets.geojson`, `boundary.geojson`, `stats.json`, `top50.csv`
 | Copernicus DEM GLO-30 (tile N45 E008) | slope, aspect, upstream position for hydro | OK |
 | Meta/WRI Global Canopy Height 1 m (Tolan et al. 2024, AWS Open Data) | canopy height per cell, read at ~2.5 m from the COG overviews, aggregated by max over 10 m | the ETH Lang et al. tile is no longer served (HTTP 500); fallback is a constant 20 m, flagged in the UI |
 | Agenzia delle Entrate cadastre | sheet and parcel of a zone | bulk GML unreachable (HTTP 500 / SOAP fault); INSPIRE WMS `GetFeatureInfo` on `CP.CadastralParcel` at the centroid of the top 120 zones instead |
-| AWS Terrain Tiles (terrarium) + OpenFreeMap `dark` | 3D terrain and basemap | CARTO raster tiles now return "API KEY REQUIRED", hence OpenFreeMap; if it does not answer in 8 s, start on black + hillshade |
+| AWS Terrain Tiles (terrarium) + OpenFreeMap vector tiles (`planet`) | 3D terrain; lake, woods, buildings on the block | CARTO raster tiles now return "API KEY REQUIRED", hence OpenFreeMap; if it does not answer the block is plain relief |
 | Sentinel-2 NDVI/NDWI | optional | not integrated |
 
 **Declared limit:** OSM does not contain e-distribuzione's MV network at
@@ -364,3 +385,18 @@ Append-only. One line each: what was decided, why.
   compete with it. No budget control anywhere, including the questionnaire.
 - **2026-11-15** (Kurt) The 15-panel storyboard is matched to the 7 screens by
   content; its panels 7 and 8 are both screen 7.
+- **2026-11-15** (Kurt) Look changed from dark to light: sage backdrop, black
+  rounded cards, white pills, after the Orion reference. The dark map read as a
+  generic GIS viewer.
+- **2026-11-15** (Kurt) The map is a closed 14 km block around Verbania on a
+  plain backdrop, no world basemap, no free scrolling. Done by cutting the DEM
+  in a custom tile protocol rather than masking, so the block has real sides.
+- **2026-11-15** A stopped (credits). On Kurt's instruction B edited
+  `app/map/map.js`, `zones.js`, `camera.js` for the two items above and the pin.
+  Ownership in PROTOCOL.md is otherwise unchanged; A takes them back on return.
+- **2026-11-15** The overview is flat only as the first beat of the intro; the
+  block is then shown tilted, because the tilted slab is the look Kurt asked for.
+- **2026-11-15** Pin with progress ring is drawn by the map (`zones.js`), on the
+  selected zone once a plan other than "No action" is toggled on; ring at step 1.
+- **2026-11-15** Primary buttons are white, not the role accent; the accent
+  (cyan for Risk Manager) is kept to eyebrows, focus and the map toggle.

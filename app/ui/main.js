@@ -35,7 +35,7 @@
     if (v == null || isNaN(v)) return '–';
     const a = Math.abs(v);
     if (a === 0) return '0';
-    if (a >= 10) return String(Math.round(v));
+    if (a >= 10 || Number.isInteger(v)) return String(Math.round(v));
     if (a >= 1) return (Math.round(v * 10) / 10).toFixed(1);
     return (Math.round(v * 100) / 100).toFixed(2);
   }

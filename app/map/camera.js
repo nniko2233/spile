@@ -18,8 +18,11 @@
   const ORBIT_MS = 6200;
   const DIVE_MS = 3800;
 
-  /** End of the orbit: over the lake shore, looking north-west at the hills. */
-  const ORBIT_END = { center: [8.5450, 45.9380], zoom: 12.7, pitch: 60, bearing: -34 };
+  /**
+   * The intro opens flat on the whole block (the overview is 2D), then tilts and
+   * turns a quarter around it: only then is the map 3D.
+   */
+  const ORBIT_END = { center: [8.5330, 45.9330], zoom: 11.75, pitch: 58, bearing: -34 };
 
   const NO_PAD = { top: 0, right: 0, bottom: 0, left: 0 };
 
@@ -141,7 +144,7 @@
         else finishIntro();
       } else if (p.prev === S.AREA || p.prev === S.PLANS) {
         // Pull back a little so the hillside sits in its valley again.
-        map.easeTo({ padding: NO_PAD, zoom: map.getZoom() - 0.7, duration: 1500, essential: true });
+        map.easeTo({ padding: NO_PAD, zoom: Math.max(12.4, map.getZoom() - 1.6), duration: 1500, essential: true });
       }
     } else if (p.screen === S.AREA) {
       if (introState !== 'done') skipIntro();

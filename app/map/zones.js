@@ -19,7 +19,7 @@
   const E = SPILE.EVENTS, S = SPILE.SCREENS, bus = SPILE.bus, D = SPILE.data;
 
   const CELL_M = 20;
-  const OPACITY = { cells: 0.84, fill: 0.16, line: 0.72 };
+  const OPACITY = { cells: 0.9, fill: 0.28, line: 0.9 };
 
   const hexToRgb = hex => {
     const n = parseInt(hex.replace('#', ''), 16);
@@ -83,7 +83,7 @@
       id: 'zones-selected', type: 'line', source: 'zones',
       filter: ['==', ['get', 'id'], -1],
       layout: { 'line-join': 'round' },
-      paint: { 'line-color': '#ffffff', 'line-width': 2.2, 'line-opacity': 0.9, 'line-blur': 0.6 },
+      paint: { 'line-color': '#141a14', 'line-width': 2.4, 'line-opacity': 0.95, 'line-blur': 0.3 },
     }, before);
 
     map.on('click', onClick);
@@ -262,8 +262,46 @@
 
   bus.on(E.ZONE_CLEARED, clearSelection);
 
-  bus.on(E.PLAN_SELECTED, p => { if (p && p.planId) showPlan(p.planId, p.zoneId); });
-  bus.on(E.PLAN_CLEARED, () => showPlan(null, selectedId));
+  /* ---------------------------------------------------------------- pins */
+
+  /**
+   * A pin stands only on a zone with an active plan, request or job. The pin is
+   * neutral: its ring shows progress in three steps (Plan, Request, Procurement)
+   * and never carries a risk colour. This build only reaches step 1.
+   */
+  const PIN_STEPS = ['Plan', 'Request', 'Procure'];
+  let pin = null;
+
+  function pinElement(step) {
+    const arc = i => {
+      // Three 100 degree arcs around the head of the pin, 20 degree gaps.
+      const a0 = (-90 + i * 120 + 10) * Math.PI / 180, a1 = (-90 + i * 120 + 110) * Math.PI / 180, r = 17;
+      const p = a => (23 + r * Math.cos(a)).toFixed(2) + ' ' + (23 + r * Math.sin(a)).toFixed(2);
+      return '<path class="pin-seg' + (i < step ? ' is-done' : '') + '" d="M' + p(a0) + ' A' + r + ' ' + r + ' 0 0 1 ' + p(a1) + '"/>';
+    };
+    const el = document.createElement('div');
+    el.className = 'pin';
+    el.innerHTML = '<svg viewBox="0 0 46 58" aria-hidden="true">' +
+      '<path class="pin-body" d="M23 57 L11 38 A21 21 0 1 1 35 38 Z"/>' +
+      arc(0) + arc(1) + arc(2) +
+      '<text x="23" y="26">' + PIN_STEPS[step - 1] + '</text></svg>';
+    return el;
+  }
+
+  function setPin(zoneId, step) {
+    if (pin) { pin.remove(); pin = null; }
+    const zone = zoneId != null && D.getZone(zoneId);
+    if (!zone || !map || !window.maplibregl) return;
+    pin = new maplibregl.Marker({ element: pinElement(step), anchor: 'bottom', offset: [0, -26], opacity: '1', opacityWhenCovered: '1' })
+      .setLngLat([zone.lon, zone.lat]).addTo(map);
+  }
+
+  bus.on(E.PLAN_SELECTED, p => {
+    if (!p || !p.planId) return;
+    showPlan(p.planId, p.zoneId);
+    if (p.planId === 'no_action') setPin(null); else setPin(p.zoneId != null ? p.zoneId : selectedId, 1);
+  });
+  bus.on(E.PLAN_CLEARED, () => { showPlan(null, selectedId); setPin(null); });
   bus.on(E.PLAN_HOVER, p => {
     if (!p) return;
     const zoneId = p.zoneId != null ? p.zoneId : (previewZone != null ? previewZone : selectedId);

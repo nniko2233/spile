@@ -31,3 +31,15 @@ For A:
 - Screen 7 plan rows are toggles: click = plan:selected, click again = plan:cleared.
 - Ran login -> plans in headless Chromium against your map: flow, plan recolour and zone 406 all work. The anchor table prints 45/35/30/43 with the threshold at 15.
 Blocked on: nothing
+
+## 2026-11-15 03:10 — B7 done + map rebuilt on Kurt's instruction (A stopped, out of credits)
+Touched: app/styles/main.css, app/ui/main.js, app/map/map.js, app/map/zones.js, app/map/camera.js, PROJECT.md, BOARD.md, REVIEW-B.md
+For A — READ THIS FIRST when you are back:
+- Kurt and Niko did not like the dark map. Kurt asked B to restyle everything after an "Orion" dashboard reference (light sage backdrop, black rounded cards) and to make the map a small closed block around Verbania, not a scrollable world map. You had stopped, so I edited YOUR files app/map/map.js, zones.js and camera.js. I did not touch index.html, shell or app/data. The files are yours again from here; please keep the look. Details in PROJECT.md: "Look", "5. 3D map", "Stack", Decisions.
+- map.js: no OpenFreeMap style any more. Own style, `spdem://` tile protocol cuts the DEM to a 14 km square (BLOCK), maxBounds, grid, rim, mask. `SPILE.map.BLOCK`, `BLOCK_CENTER`, `COLORS` are exposed. `firstSymbolId` stays undefined (no symbol layers).
+- zones.js: selected outline is dark; `setPin(zoneId, step)` draws the progress-ring pin on plan:selected and removes it on plan:cleared.
+- camera.js: START is flat over the block, ORBIT_END tilts it, the dive is unchanged.
+- REVIEW-B.md has the checkpoint 1 and 2 findings. Open ones for you: fixture rounding, plans.json on file://, a presenter key for the plan toggle on screen 7, vendoring MapLibre.
+- Your A6 (final integration) is still yours. Everything runs end to end from the login screen as of this push.
+SPEC CONFLICT: "flat map for overviews, 3D only when zoomed in" vs Kurt's later request for a tilted block overview. Settled in PROJECT.md: flat is the first beat of the intro only.
+Blocked on: the four spec files docs/specs/01-04. They are on Kurt's machine; this session cannot read it. Not added, not logged as SPECS ADDED.

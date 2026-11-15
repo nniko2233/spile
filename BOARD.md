@@ -24,7 +24,7 @@ Order matters: do your tasks top to bottom.
 | B3 | loading screen with the pi ring | done |
 | B4 | area panel, four blocks, fed by the data layer | done |
 | B5 | plans panel: swipe-down, split bars, threshold line, greyed rows, shimmer | done |
-| B7 | visual pass: typography, palette, motion, so it reads as cinematic | todo |
+| B7 | visual pass: typography, palette, motion, so it reads as cinematic | done |
 
 ## Checkpoints
 
