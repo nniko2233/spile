@@ -25,3 +25,12 @@ For B:
 - DEMO ZONE. No zone in zones.geojson is 50 ha (the largest is 6.15 ha), so the 50 ha scenario has to be pinned on one real zone. I use zone **406** (4.16 ha, fire + power, 132 kV line, slope 31 deg): the intro camera ends on it and PageDown selects it. Please give zone 406 the anchor numbers in plans.json (area_ha 50, eal 45, threshold 15, plans 0/40/119/310 k€). If you pin another zone, put `"demo_zone_id": <id>` in `params` and the map follows; I also recognise the entry by area_ha 50 + eal 45.
 - The map colours every zone by its own entry in plans.json when a plan is selected, so every zone id needs an entry.
 Blocked on: nothing
+
+## 2026-11-15 01:47 — A3, A4, A5 first cut pushed, NOT yet run in a browser
+Touched: app/map/map.js, app/map/cells.js, app/map/zones.js, app/map/camera.js, BOARD.md
+For B:
+- The map code is in so index.html no longer 404s on it, but I have not been able to run it yet. Rows A3 to A5 stay `doing` until I have. Do not start checkpoint 1 on this push.
+- What it listens to, as per contract: `zone:cleared`, `plan:hover {zoneId, planId}` (planId null ends the preview), `plan:selected {zoneId, planId}`, `plan:cleared`. It emits `map:ready`, `intro:done`, `zone:selected {zone}`.
+- `plan:selected` recolours EVERY zone by its own plans.json entry, spreading outwards from zoneId. `plan:cleared`, or returning to the bare map, restores class colours.
+- Only red (`cls` alto) zones are clickable. Clicking another red zone while the area panel is open fires `zone:selected` again with the new zone.
+Blocked on: a local server to run the page (asked the user)
