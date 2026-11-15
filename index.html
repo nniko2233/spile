@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SPILE</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+
+<!-- Structural layering only. Everything visual lives in app/styles (Agent B),
+     which loads after this block and may override any of it. -->
+<style>
+  :root {
+    --spile-bg: #04070b;
+    --spile-area-w: 440px;      /* width the area panel covers on the right, screen 6 */
+    --spile-plans-map-h: 42vh;  /* height of the map band left visible at the top, screen 7 */
+  }
+  html, body { height: 100%; margin: 0; background: var(--spile-bg); overflow: hidden; }
+
+  /* The map stage sits under every screen and stays dark until screen 5. */
+  #stage { position: fixed; inset: 0; opacity: 0; transition: opacity 1.8s ease; }
+  body[data-stage="on"] #stage { opacity: 1; }
+  #map { position: absolute; inset: 0; background: var(--spile-bg); }
+
+  /* One <section> per screen. The shell toggles .is-active, B fills them. */
+  #screens { position: fixed; inset: 0; pointer-events: none; }
+  .screen {
+    position: absolute; inset: 0; opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .7s ease, visibility 0s linear .7s;
+  }
+  .screen.is-active { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity .7s ease; }
+  /* Screens 5-7 float over the map: the section lets clicks through, its children do not. */
+  .screen[data-screen="map"], .screen[data-screen="area"], .screen[data-screen="plans"] { pointer-events: none; }
+  .screen[data-screen="map"].is-active > *,
+  .screen[data-screen="area"].is-active > *,
+  .screen[data-screen="plans"].is-active > * { pointer-events: auto; }
+
+  /* Compass: the only thing on the map. */
+  #compass {
+    position: absolute; top: 28px; right: 28px; width: 54px; height: 54px; padding: 0;
+    border: 0; border-radius: 50%; background: rgba(6, 10, 15, .55); cursor: pointer;
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .14), 0 8px 30px rgba(0, 0, 0, .5);
+    opacity: .82; transition: opacity .3s ease;
+  }
+  #compass:hover { opacity: 1; }
+  #compass svg { display: block; width: 100%; height: 100%; }
+  #compass-rose { transform-origin: 27px 27px; }
+
+  /* Attribution is a licence requirement: keep it, collapsed and dim. */
+  .maplibregl-ctrl-attrib.maplibregl-compact { background: rgba(6, 10, 15, .5); opacity: .35; }
+  .maplibregl-ctrl-attrib.maplibregl-compact:hover { opacity: .9; }
+  .maplibregl-ctrl-attrib a, .maplibregl-ctrl-attrib-inner { color: #9aa7b4; }
+  .maplibregl-ctrl-attrib-button { filter: invert(1); }
+  .maplibregl-canvas { outline: none; }
+
+  /* ?dev only: label empty screens so the flow is testable before B's UI lands. */
+  .screen[data-dev-empty]::after {
+    content: attr(data-screen) "  ·  PageDown next  ·  PageUp back";
+    position: absolute; left: 24px; bottom: 20px; font: 12px/1 ui-monospace, Consolas, monospace;
+    letter-spacing: .08em; color: rgba(255, 255, 255, .35);
+  }
+</style>
+
+<!-- Agent B: this stylesheet and app/ui/main.js below are your two entry points. -->
+<link rel="stylesheet" href="app/styles/main.css">
+</head>
+<body data-screen="" data-stage="off">
+
+<div id="stage">
+  <div id="map"></div>
+  <button id="compass" type="button" aria-label="Reset north">
+    <svg viewBox="0 0 54 54" aria-hidden="true">
+      <circle cx="27" cy="27" r="20.5" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="1"/>
+      <g id="compass-rose">
+        <path d="M27 9 L31.2 27 L27 25 L22.8 27 Z" fill="#ff3b30"/>
+        <path d="M27 45 L31.2 27 L27 29 L22.8 27 Z" fill="rgba(255,255,255,.42)"/>
+        <path d="M27 3.2 V6.4 M27 47.6 V50.8 M3.2 27 H6.4 M47.6 27 H50.8" stroke="rgba(255,255,255,.5)" stroke-width="1.2" stroke-linecap="round"/>
+      </g>
+    </svg>
+  </button>
+</div>
+
+<main id="screens">
+  <section class="screen" id="screen-login" data-screen="login"></section>
+  <section class="screen" id="screen-auth" data-screen="auth"></section>
+  <section class="screen" id="screen-questionnaire" data-screen="questionnaire"></section>
+  <section class="screen" id="screen-loading" data-screen="loading"></section>
+  <section class="screen" id="screen-map" data-screen="map"></section>
+  <section class="screen" id="screen-area" data-screen="area"></section>
+  <section class="screen" id="screen-plans" data-screen="plans"></section>
+</main>
+
+<!-- MapLibre loads async so a slow CDN never blocks the login screen. -->
+<script async src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"
+        onload="window.dispatchEvent(new Event('maplibre:ready'))"></script>
+
+<script src="app/contract.js"></script>
+<script src="data/bundle.js"></script>
+
+<!-- A: data layer -->
+<script src="app/data/plans-fixture.js"></script>
+<script src="app/data/store.js"></script>
+
+<!-- A: map -->
+<script src="app/map/cells.js"></script>
+<script src="app/map/map.js"></script>
+<script src="app/map/zones.js"></script>
+<script src="app/map/camera.js"></script>
+
+<!-- A: shell -->
+<script src="app/shell/shell.js"></script>
+
+<!-- B: UI entry point. Load anything else you need from here. -->
+<script src="app/ui/main.js"></script>
+
+</body>
+</html>

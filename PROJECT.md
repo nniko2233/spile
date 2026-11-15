@@ -176,6 +176,35 @@ spile/
 └── pipeline/           Python pipeline, inherited, never re-run
 ```
 
+## Shell and mount points
+
+`index.html` holds one empty `<section class="screen" id="screen-<name>"
+data-screen="<name>">` per screen, over a persistent map stage (`#stage` > `#map`
++ `#compass`). `app/shell/shell.js` is the only code that changes screen: it
+toggles `.is-active` on the section, sets `<body data-screen>` and
+`<body data-stage="on|off">`, then emits `screen:show {screen, prev}`. The UI
+renders into the sections and never switches them itself.
+
+```
+login --role:picked--> auth --auth:done--> questionnaire --survey:done-->
+loading --(map:ready, held at least 4.2 s, at most 16 s)--> map
+map --zone:selected--> area --plans:open--> plans
+zone:cleared returns to map; screen:back steps plans -> area -> map.
+```
+
+`index.html` loads exactly two UI files: `app/styles/main.css` and
+`app/ui/main.js`. Everything else the UI needs is loaded from those two.
+
+Layout constants are CSS variables on `:root`, read by the map at each
+transition, so the UI can change them from CSS: `--spile-area-w` (440px, the
+width the area panel covers on the right) and `--spile-plans-map-h` (42vh, the
+map band left visible at the top of screen 7). The map never resizes: the panels
+cover it and the camera pads itself to keep the zone in the visible part.
+
+Presenter safety net: `PageDown` advances one screen, `PageUp` and `Esc` step
+back, whatever the UI is doing. `?screen=<name>` jumps to a screen and `?dev`
+labels empty screens; both are development only.
+
 ## Data
 
 `data/` is inherited from the previous prototype and reused **unchanged**.
@@ -250,3 +279,9 @@ Append-only. One line each: what was decided, why.
   failure mode on stage, and buys nothing a precomputed plan set does not.
 - **2026-11-15** B starts with `opt/make_plans.py` rather than the login screen,
   because `data/plans.json` is the only real dependency A has on B.
+- **2026-11-15** Contract gained `auth:done` and `screen:back`. Without them the
+  flow could not leave the sign-in form or return from the plans view.
+- **2026-11-15** The map never resizes for screens 6 and 7; panels cover it and
+  the camera pads. Resizing a WebGL canvas mid-transition stutters on stage.
+- **2026-11-15** Only the Risk Manager column advances the flow; `role:picked`
+  with another role is ignored by the shell.
