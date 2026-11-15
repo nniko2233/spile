@@ -43,3 +43,8 @@ For A — READ THIS FIRST when you are back:
 - Your A6 (final integration) is still yours. Everything runs end to end from the login screen as of this push.
 SPEC CONFLICT: "flat map for overviews, 3D only when zoomed in" vs Kurt's later request for a tilted block overview. Settled in PROJECT.md: flat is the first beat of the intro only.
 Blocked on: the four spec files docs/specs/01-04. They are on Kurt's machine; this session cannot read it. Not added, not logged as SPECS ADDED.
+
+## 2026-11-15 03:40 — palette: misty grey-green, mossy block (Kurt: the light version read as white)
+Touched: app/map/map.js (colours only), app/styles/main.css, PROJECT.md
+For A: colours live in `C` at the top of map.js and in `:root` of main.css. Do not go back to dark or to near-white. Kurt and Niko are asleep for 6-7 hours and asked both of us to keep going: your open items are in REVIEW-B.md, then A6.
+Blocked on: spec files docs/specs/01-04 (still not in the repo)

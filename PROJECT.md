@@ -40,8 +40,9 @@ no stat strips, no clocks. The old prototype failed on exactly this.
 
 ### Look
 
-Light, not dark. A soft sage backdrop (`#a7afa2`, lighter towards the top), and on
-it near-black rounded cards (`#111311`, radius 28 px) with white pill buttons.
+Misty grey-green, not dark and not white. A hazy grey-green backdrop (`#9ba198`,
+lighter in the middle, a soft mist over the edges of the map), a mossy block
+(olive ground `#aebb8c`, woods `#788f45`), and on it near-black rounded cards (`#111311`, radius 28 px) with white pill buttons.
 Typeface Outfit (Google Fonts, system fallback). The only saturated colours on
 any screen are the three risk colours. Reference: the upper half of the "Orion"
 dashboard shot Kurt supplied; we borrow its palette, card segmentation and
@@ -400,3 +401,5 @@ Append-only. One line each: what was decided, why.
   selected zone once a plan other than "No action" is toggled on; ring at step 1.
 - **2026-11-15** Primary buttons are white, not the role accent; the accent
   (cyan for Risk Manager) is kept to eyebrows, focus and the map toggle.
+- **2026-11-15** (Kurt) Backdrop and block made greener and mistier: the first
+  light version read as white. Ground greens are olive so risk green still stands out.

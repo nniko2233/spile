@@ -8,8 +8,8 @@
 
 :root {
   /* Look: light sage backdrop, near-black rounded cards, white pills. */
-  --bg: #a7afa2;
-  --backdrop: radial-gradient(120% 100% at 30% 0%, #c6ccc0 0%, #a7afa2 55%, #8f998a 100%);
+  --bg: #9ba198;
+  --backdrop: radial-gradient(90% 80% at 50% 38%, #b9bdb4 0%, #9ba198 55%, #7f867b 100%);
   --card: #111311;
   --dark-ink: #131813;
   --radius: 28px;
@@ -19,7 +19,7 @@
   --hair: rgba(255, 255, 255, .1);
   --hair-2: rgba(255, 255, 255, .2);
   --glass: rgba(15, 17, 15, .92);
-  --spile-bg: #a7afa2;
+  --spile-bg: #9ba198;
   --risk-high: #ff3b30;
   --risk-mid: #ffb020;
   --risk-low: #2fd47a;
@@ -37,6 +37,14 @@ body[data-role="procurement"] { --accent: #ff7ab8; }
 
 html, body { background: var(--bg); }
 #map { background: var(--bg); }
+/* Mist: the block sits in a soft haze that thickens towards the edges of the frame. */
+#stage::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(75% 65% at 50% 46%, transparent 50%, rgba(170, 176, 166, .5) 100%),
+    linear-gradient(to bottom, rgba(196, 200, 192, .5) 0%, transparent 26%);
+}
+#compass { z-index: 2; }
 body { font-family: var(--font); color: var(--ink); -webkit-font-smoothing: antialiased; }
 .screen { font-size: 15px; line-height: 1.45; }
 .screen *, .screen *::before, .screen *::after { box-sizing: border-box; }

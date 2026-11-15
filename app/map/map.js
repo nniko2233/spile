@@ -38,10 +38,13 @@
   const RIM_M = 190;            // width of the uniform band along the edge, metres
   const PLINTH_ELEV = -140;    // metres given to everything outside the block: the slab it stands on
 
-  /** Light, desaturated sage palette. Risk colours are the only saturated thing on the map. */
+  /**
+   * Misty grey-green backdrop, mossy block. The greens of the ground are olive and
+   * muted so the risk green (#2fd47a) still reads as a signal on top of them.
+   */
   const C = {
-    backdrop: '#a7afa2', sky: '#c3c9be', ground: '#e3e7dc', wood: '#c9d4bb', water: '#b7c9cc',
-    built: '#f4f5ef', grid: '#ffffff', ink: '#2b332b', edge: '#1b211b', rim: '#7d8878',
+    backdrop: '#9ba198', sky: '#b4b8b0', ground: '#aebb8c', wood: '#788f45', water: '#a3b6b2',
+    built: '#e4e9d6', grid: '#f4f8e6', ink: '#232b1c', edge: '#1a2014', rim: '#5f6d4c',
   };
 
   /** Where the intro starts: the whole block, flat, seen from above. */
@@ -177,9 +180,9 @@
           // Anchored to the map so the light does not swing during the orbit.
           'hillshade-illumination-anchor': 'map',
           'hillshade-illumination-direction': 300,
-          'hillshade-shadow-color': '#46543f',
-          'hillshade-highlight-color': '#ffffff',
-          'hillshade-accent-color': '#7d8c74',
+          'hillshade-shadow-color': '#2a371c',
+          'hillshade-highlight-color': '#f1f7d4',
+          'hillshade-accent-color': '#56692f',
         },
       });
 
@@ -190,7 +193,7 @@
         try {
           map.setSky({
             'sky-color': C.sky, 'horizon-color': C.backdrop, 'fog-color': C.backdrop,
-            'sky-horizon-blend': 1, 'horizon-fog-blend': 1, 'fog-ground-blend': 0.9,
+            'sky-horizon-blend': 1, 'horizon-fog-blend': 1, 'fog-ground-blend': 0.55,
             'atmosphere-blend': 0,
           });
         } catch (err) { console.info('[map] no sky in this MapLibre build'); }
@@ -226,7 +229,7 @@
       filter: ['in', ['get', 'class'], ['literal', ['wood', 'forest']]], paint: { 'fill-color': C.wood, 'fill-opacity': 0.9 } });
     map.addLayer({ id: 'sp-water', type: 'fill', source: 'ofm', 'source-layer': 'water', paint: { 'fill-color': C.water } });
     map.addLayer({ id: 'sp-building', type: 'fill', source: 'ofm', 'source-layer': 'building', minzoom: 12.5,
-      paint: { 'fill-color': C.built, 'fill-opacity': 0.9 } });
+      paint: { 'fill-color': C.built, 'fill-opacity': 0.75 } });
   }
 
   /**
@@ -241,11 +244,11 @@
 
     map.addSource('ways', { type: 'geojson', data: pick(/^(road_|rail)/) });
     map.addLayer({ id: 'sp-ways', type: 'line', source: 'ways', layout: round,
-      paint: { 'line-color': '#ffffff', 'line-width': ['interpolate', ['linear'], ['zoom'], 11, 0.5, 15, 2.2], 'line-opacity': 0.75 } });
+      paint: { 'line-color': C.built, 'line-width': ['interpolate', ['linear'], ['zoom'], 11, 0.5, 15, 2.2], 'line-opacity': 0.7 } });
 
     map.addSource('grid', { type: 'geojson', data: gridLines() });
     map.addLayer({ id: 'sp-grid', type: 'line', source: 'grid', filter: ['!', ['get', 'edge']],
-      paint: { 'line-color': C.grid, 'line-width': 0.8, 'line-opacity': 0.5 } });
+      paint: { 'line-color': C.grid, 'line-width': 0.8, 'line-opacity': 0.4 } });
 
     const boundary = SPILE.data.getBoundary();
     if (boundary) {
