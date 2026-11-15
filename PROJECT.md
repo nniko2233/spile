@@ -620,3 +620,11 @@ Append-only. One line each: what was decided, why.
   ground was too busy, and solid red hid the terrain under it.
 - **2026-11-15** (Kurt) The plans view opens from the button only. Scrolling to
   the end of the area panel used to open it, which felt like the app deciding.
+- **2026-11-15** Niko: the intro flight is faster, 4.0 s orbit + 2.6 s dive (was
+  6.2 + 3.8). It read as slow after the questionnaire.
+- **2026-11-15** Niko: on the questionnaire, Next on Part A fills Parts B to F from
+  the sector template (each flashes by for 0.24 s) and lands on Part G with
+  "Build the risk map". Back and the rail still open every part by hand.
+- **2026-11-15** Niko: the action buttons must stay visible in a window of any
+  size. The questionnaire card has a definite height and scrolls inside, pop-up
+  footers are sticky, and one block of small-window rules ends main.css.

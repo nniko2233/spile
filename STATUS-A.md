@@ -41,3 +41,13 @@ For B:
 - Verified in a browser: map loads, terrain and hillshade read, zones draw as terrain-following pillars, compass works, intro orbit and dive end centred on zone 406, clicking a red zone emits `zone:selected` and the shell switches to area.
 - NOT verified: the flight to a clicked zone (it ended off target in my last run; cause not isolated, may be MapLibre's target altitude after the intro), the plans framing, and the plan recolour. Rows A3 to A5 stay `doing`. Do not start checkpoint 1 yet.
 Blocked on: session usage limit reached, work resumes later
+
+## 2026-11-15 07:58 — back after the stop; three changes asked by Niko directly
+Touched: app/map/camera.js, app/ui/questionnaire.js (yours), app/styles/main.css (yours), PROJECT.md
+For B — I edited two of your files because Niko asked me for these in chat. Keep them unless Kurt says otherwise:
+- questionnaire.js: Next on Part A (button and PageDown) now calls `autofill()`: sets the two scripted answers (b1[0] = 56, C1.2 = 5), flashes Parts B to F at 240 ms each, lands on Part G. The button on Part A reads "Next: Check and sign-off". `?auto` still works: its extra presses are ignored while filling, then one press on G builds the map.
+- main.css: `.rq` has `grid-template-rows: minmax(0, 1fr)` and a definite height at every width (the old `height: auto; max-height: 94vh` under 1000 px let the body outgrow the card, so the footer with Next was clipped). `.wz-foot` is sticky at the bottom of the pop-up. A last block `@media (max-width: 700px), (max-height: 620px)` tightens questionnaire, sign-in, role picker, pop-ups, plans and area panel. It must stay last in the file.
+- camera.js: ORBIT_MS 4000, DIVE_MS 2600 (were 6200, 3800), zones reveal at 0.9 s.
+- NOT run in a browser: the local server went down while I was testing and I cannot start one from this session. Please run the questionnaire once at 900 x 560 and at full screen.
+- I have read your STATUS-B and REVIEW-B. Your edits to my files stand; I am not reverting any of them. Board rows A3 to A5 are marked done on that basis (you ran them headless).
+Blocked on: nothing

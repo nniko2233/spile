@@ -207,9 +207,9 @@ body[data-screen="area"] .map-tools { left: calc((100vw - var(--spile-area-w)) /
 
 /* ---------------------------------------------------- 3. questionnaire */
 
-.rq { width: min(1240px, 95vw); height: min(700px, 90vh); display: grid; grid-template-columns: 252px 1fr; border-radius: var(--radius);
+.rq { width: min(1240px, 95vw); height: min(700px, 92vh); display: grid; grid-template-columns: 252px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); border-radius: var(--radius);
   background: var(--card); box-shadow: 0 30px 70px rgba(20, 28, 20, .3); overflow: hidden; animation: rise .7s var(--ease) both; }
-.rq-rail { padding: 30px 22px 24px 28px; border-right: 1px solid var(--hair); display: flex; flex-direction: column; gap: 14px; background: rgba(255, 255, 255, .025); }
+.rq-rail { min-height: 0; overflow: auto; scrollbar-width: none; padding: 30px 22px 24px 28px; border-right: 1px solid var(--hair); display: flex; flex-direction: column; gap: 14px; background: rgba(255, 255, 255, .025); }
 .rq-rule { font-size: 15px; color: var(--ink-2); line-height: 1.35; margin-bottom: 8px !important; }
 .rq-rule b { color: var(--ink); font-weight: 500; }
 .rq-rail ol { display: flex; flex-direction: column; gap: 2px; flex: 1; }
@@ -226,13 +226,16 @@ body[data-screen="area"] .map-tools { left: calc((100vw - var(--spile-area-w)) /
 .rq-rail li.is-now b { color: var(--ink); }
 .rq-src { font-size: 10.5px; color: var(--ink-3); line-height: 1.4; }
 
-.rq-body { display: flex; flex-direction: column; min-width: 0; padding: 28px 34px 24px; }
-.rq-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; padding-bottom: 18px; border-bottom: 1px solid var(--hair); }
+.rq-body { display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: 28px 34px 24px; }
+/* While Parts B to F fill themselves the form takes no clicks. */
+.rq.is-filling .rq-body { pointer-events: none; }
+.rq.is-filling .rq-part { animation-duration: .2s; }
+.rq-head { flex: none; display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; padding-bottom: 18px; border-bottom: 1px solid var(--hair); }
 .rq-head h1 { font-size: 32px; font-weight: 300; letter-spacing: -.01em; line-height: 1.1; margin-top: 6px; }
 .rq-builds { font-size: 12px; color: var(--ink-3); letter-spacing: .04em; }
 .rq-builds b { color: var(--ink); font-weight: 500; }
 .rq-part { flex: 1; min-height: 0; overflow: auto; padding: 20px 2px 8px 0; display: flex; flex-direction: column; gap: 22px; scrollbar-width: thin; scrollbar-color: var(--hair-2) transparent; animation: rise .45s var(--ease) both; }
-.rq-foot { display: flex; align-items: center; justify-content: space-between; padding-top: 16px; border-top: 1px solid var(--hair); }
+.rq-foot { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding-top: 16px; border-top: 1px solid var(--hair); }
 .rq-foot .btn { height: 46px; font-size: 12px; }
 
 .rq-field { display: flex; flex-direction: column; gap: 11px; min-width: 0; }
@@ -316,7 +319,10 @@ body[data-screen="area"] .map-tools { left: calc((100vw - var(--spile-area-w)) /
 .rq-sign { display: grid; grid-template-columns: 96px 1fr; row-gap: 7px; font-size: 13px; }
 .rq-sign dt { color: var(--ink-3); }
 
-@media (max-width: 1000px) { .rq { grid-template-columns: 1fr; height: auto; max-height: 94vh; } .rq-rail { display: none; } .rq-row { grid-template-columns: 1fr; } }
+/* Small windows. The card always has a definite height, so the part scrolls and
+   the footer with Next / Build the risk map never leaves the screen. */
+@media (max-width: 1000px) { .rq { grid-template-columns: minmax(0, 1fr); height: min(700px, 94vh); } .rq-rail { display: none; } .rq-row { grid-template-columns: 1fr; } }
+
 
 /* ---------------------------------------------------------- 4. loading */
 
@@ -509,7 +515,7 @@ body[data-screen="area"] .map-tools { left: calc((100vw - var(--spile-area-w)) /
 .popup-wrap { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(40, 48, 38, .34);
   backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); animation: fade .35s ease both; transition: opacity .35s ease; }
 .popup-wrap.is-leaving { opacity: 0; }
-.popup { width: min(1160px, 95vw); max-height: 94vh; overflow: auto; padding: 28px 30px 22px; border-radius: var(--radius); background: var(--card);
+.popup { width: min(1160px, 95vw); max-height: 94vh; overflow: auto; padding: 28px 30px 0; border-radius: var(--radius); background: var(--card);
   box-shadow: 0 40px 90px rgba(10, 16, 10, .5); display: flex; flex-direction: column; gap: 18px; animation: rise .5s var(--ease) both; }
 .popup-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
 .popup-head h2 { font-size: 30px; font-weight: 300; letter-spacing: -.01em; margin-top: 6px; }
@@ -549,7 +555,8 @@ body[data-screen="area"] .map-tools { left: calc((100vw - var(--spile-area-w)) /
 .wz-t em { font-style: normal; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
 .wz-t em.is-pre { padding: 3px 9px; border-radius: 999px; border: 1px solid var(--accent); color: var(--accent); }
 
-.wz-foot { display: flex; align-items: center; gap: 18px; }
+/* The pop-up scrolls as a whole; its action row stays pinned to the bottom edge. */
+.wz-foot { display: flex; align-items: center; gap: 18px; position: sticky; bottom: 0; z-index: 1; margin: 0 -30px; padding: 12px 30px 22px; background: var(--card); }
 .screen .wz-status { display: flex; align-items: center; gap: 5px; margin-right: auto; }
 .wz-status li { padding: 5px 9px; border-radius: 999px; border: 1px solid var(--hair); white-space: nowrap; font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
 .wz-status li.is-done { color: var(--ink-2); border-color: var(--hair-2); }
@@ -622,4 +629,25 @@ tr.is-assigned td { animation: row-flash 1.6s ease; }
 
 @media (prefers-reduced-motion: reduce) {
   .screen *, .screen *::before, .screen *::after { animation-duration: .01s !important; transition-duration: .01s !important; }
+}
+
+/* ------------------------------------------------------ small windows */
+
+/* Last in the file so it wins over the per-screen rules above. */
+@media (max-width: 700px), (max-height: 620px) {
+  .rq { width: 96vw; height: 96vh; border-radius: 20px; }
+  .rq-body { padding: 16px 18px 14px; }
+  .rq-head { padding-bottom: 10px; } .rq-head h1 { font-size: 24px; } .rq-builds { display: none; }
+  .rq-part { padding-top: 12px; gap: 14px; }
+  .rq-foot { padding-top: 10px; } .rq-foot .btn { height: 42px; padding: 0 18px; letter-spacing: .08em; white-space: normal; text-align: center; line-height: 1.15; }
+  .rq-slider { grid-template-columns: minmax(0, 1fr) minmax(90px, 1fr) 36px; gap: 10px; }
+  .rq-table, .rq-matrix { min-width: 560px; }
+  .auth { padding: 26px 26px 22px; gap: 12px; max-height: 96vh; overflow: auto; }
+  .auth-title { font-size: 30px; } .auth-mark { margin-bottom: 4px; }
+  .roles { inset: 64px 10px 10px; gap: 8px; } .screen .role { padding: 0 20px 76px; } .role::after { left: 20px; bottom: 56px; } .role-go { left: 20px; bottom: 26px; }
+  .role-line { display: none; }
+  .popup { padding: 18px 18px 0; gap: 12px; } .popup-head h2 { font-size: 22px; }
+  .wz-foot { margin: 0 -18px; padding: 10px 18px 14px; flex-wrap: wrap; gap: 10px; } .wz-checks { display: none; }
+  .plans-panel { padding: 14px 16px 12px; } .plans-head h1 { font-size: 20px; } .plans-axis { margin-bottom: 22px; }
+  .area-scroll { padding: 22px 20px 20px; } .area-head h1 { font-size: 28px; }
 }

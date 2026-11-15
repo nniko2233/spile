@@ -122,7 +122,7 @@
   ];
   const ACTIONS = ['Prune', 'Fell', 'Widen corridor', 'Replant with slow species', 'Monitor only', 'Engineering fixes'];
 
-  let root, body, part = 0, played, a;
+  let root, body, part = 0, played, a, filling = null;
 
   function reset() {
     played = {};
@@ -313,8 +313,8 @@
       h('div.rq-part', { 'data-part': p.id }, VIEW[p.id]()),
       h('footer.rq-foot', null,
         part > 0 ? h('button.btn-link', { type: 'button', text: 'Back', onclick: () => go(part - 1) }) : h('span'),
-        h('button.btn.btn-primary', { type: 'button', onclick: () => (last ? done() : go(part + 1)) },
-          h('span', { text: last ? 'Build the risk map' : `Next: ${PARTS[part + 1].name}` }))));
+        h('button.btn.btn-primary', { type: 'button', onclick: () => (last ? done() : part === 0 ? autofill() : go(part + 1)) },
+          h('span', { text: last ? 'Build the risk map' : `Next: ${PARTS[part === 0 ? PARTS.length - 1 : part + 1].name}` }))));
     root.querySelectorAll('.rq-rail li').forEach((li, i) => {
       li.classList.toggle('is-now', i === part);
       li.classList.toggle('is-done', i < part);
@@ -322,6 +322,32 @@
   }
 
   function go(i) { part = Math.max(0, Math.min(PARTS.length - 1, i)); render(); }
+
+  function stopFilling() {
+    clearTimeout(filling); filling = null;
+    if (root) root.classList.remove('is-filling');
+  }
+
+  /**
+   * Demo shortcut (Niko, 15 Nov): Next on Part A does not walk B to F. The middle
+   * parts are filled from the sector template, each one flashes by so the viewer
+   * sees it happen, and the form lands on Part G with "Build the risk map".
+   * Back and the rail still reach every part by hand.
+   */
+  function autofill() {
+    if (filling) return;
+    if (!a.sector) { a.sector = 'distribution'; a.b1 = TEMPLATE.distribution.b1.slice(); a.b2 = TEMPLATE.distribution.b2.slice(); }
+    // The two answers the scripted walk used to set by hand.
+    rebalance(a.b1, 0, 56); a.importance['C1.2'] = 5; a.tab = 0;
+    played.A = played.B = played.C = true;
+    root.classList.add('is-filling');
+    let i = 1;
+    (function step() {
+      if (i >= PARTS.length - 1) { stopFilling(); go(PARTS.length - 1); return; }
+      go(i++);
+      filling = setTimeout(step, 240);
+    })();
+  }
 
   function done() {
     if (!a.sector) a.sector = 'distribution';
@@ -345,8 +371,9 @@
 
   function presenterNext() {
     const id = PARTS[part].id;
+    if (filling) return;
     if (BEAT[id] && !played[id]) { played[id] = true; BEAT[id](); return; }
-    if (part === PARTS.length - 1) done(); else go(part + 1);
+    if (part === PARTS.length - 1) done(); else if (part === 0) autofill(); else go(part + 1);
   }
 
   SPILE.ui.screen('questionnaire', {
@@ -363,6 +390,6 @@
       el.append(root);
       bus.on(E.PRESENTER_NEXT, p => { if (p && p.screen === 'questionnaire') presenterNext(); });
     },
-    show() { reset(); part = 0; render(); },
+    show() { stopFilling(); reset(); part = 0; render(); },
   });
 })();

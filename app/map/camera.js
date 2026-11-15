@@ -15,8 +15,9 @@
   'use strict';
   const E = SPILE.EVENTS, S = SPILE.SCREENS, bus = SPILE.bus, D = SPILE.data;
 
-  const ORBIT_MS = 6200;
-  const DIVE_MS = 3800;
+  // Niko, 15 Nov: the flight after the questionnaire felt slow. Was 6200 + 3800.
+  const ORBIT_MS = 4000;
+  const DIVE_MS = 2600;
 
   /**
    * The intro opens flat on the whole block (the overview is 2D), then tilts and
@@ -109,7 +110,7 @@
 
     map.stop();
     map.jumpTo(Object.assign({ padding: NO_PAD }, SPILE.map.START));
-    SPILE.map.revealZones(1500);
+    SPILE.map.revealZones(900);
 
     // 1. Orbit: a slow quarter turn around the town while the zones come up.
     map.easeTo(Object.assign({ duration: ORBIT_MS, easing: easeInOut, essential: true }, ORBIT_END));
