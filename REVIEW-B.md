@@ -21,3 +21,11 @@ A had stopped, so findings in A's files that blocked Kurt's new brief were fixed
 - index.html — MapLibre comes from unpkg with no local fallback. If the venue network blocks it, screens 5 to 7 are dead. Suggest vendoring maplibre-gl.js and .css into the repo.
 - Numbers: screen 6 prints 50 ha, 28%, 45 k€/yr, 119 k€ + 10 k€/yr, 450 k€. Screen 7 prints 45 / 35 / 30 / 43 k€/yr with residual 45 / 26 / 12 / 6 and the threshold at 15. All match PROJECT.md.
 - Event wiring: every event in contract.js has an emitter and a listener. `intro:done` has no UI consumer, which is fine.
+
+## 2026-11-15 — follow-up, A still stopped
+
+- app/data/plans-fixture.js — both rounding findings above. FIXED BY B (same rule as opt/make_plans.py; optimum picked on unrounded values).
+- index.html — MapLibre from a CDN. FIXED BY B: vendored in vendor/maplibre-gl/, unpkg kept as onerror fallback.
+- app/shell/shell.js — no presenter key on screen 7. FIXED BY B: PageDown emits presenter:next, the UI toggles the optimum, then saves.
+- Still open for A: plans.json is not in data/bundle.js, so file:// uses the fixture. Documented in PROJECT.md ("serve it over http") instead of fixed, because bundle.js is inherited data.
+- Still open for A: the intro (orbit, then dive) has only been seen in software rendering, where it is too slow to judge. Watch it once on a real GPU and tune ORBIT_MS / DIVE_MS in camera.js.

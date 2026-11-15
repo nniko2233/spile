@@ -85,3 +85,12 @@ For A — your files I edited, on Kurt's instruction ("you should build it"), be
 - Ran the whole thing headless from the role picker with PageDown and with clicks: 10 screens, pin 1 -> 2 -> 3, dashboard row turns Assigned, final view crops the still on the pin. Clicking the wrong role on the picker does nothing, as intended.
 - Still yours: A6. Open review items in REVIEW-B.md are unchanged, except the presenter key on screen 7, which now exists.
 Blocked on: nothing
+
+## 2026-11-15 — vendored MapLibre, fixture rounding, ?auto autoplay
+Touched: vendor/maplibre-gl/* (new), index.html, app/data/plans-fixture.js, app/ui/auto.js (new), app/ui/main.js, PROJECT.md, REVIEW-B.md
+For A:
+- index.html loads MapLibre from vendor/ first, unpkg on error.
+- plans-fixture.js rounds like make_plans.py; the anchor table is exact from the fixture too.
+- `?auto` plays the whole demo for the recording. Ran it headless to the final screen, no page errors, no CDN request.
+- Integration (your A6): I ran the full 10-screen flow three ways (clicks, PageDown only, ?auto). It holds. What is still rough: the intro timing on a real GPU (unseen), and file:// (fixture only). If you come back, that is what is left of A6.
+Blocked on: nothing

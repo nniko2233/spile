@@ -82,7 +82,7 @@
   if (host) host.append(h('div.demo-data', { text: 'Demo data' }));
 
   const base = (document.currentScript && document.currentScript.src.replace(/[^/]*$/, '')) || 'app/ui/';
-  ['login.js', 'questionnaire.js', 'loading.js', 'area.js', 'plans.js', 'flow.js'].forEach(f => {
+  ['login.js', 'questionnaire.js', 'loading.js', 'area.js', 'plans.js', 'flow.js', 'auto.js'].forEach(f => {
     const s = document.createElement('script');
     s.src = base + f; s.async = false;
     document.head.append(s);

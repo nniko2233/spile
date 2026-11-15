@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SPILE</title>
-<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<!-- MapLibre 4.7.1 is vendored: the demo must not depend on a CDN at the venue. -->
+<link rel="stylesheet" href="vendor/maplibre-gl/maplibre-gl.css">
 
 <!-- Structural layering only. Everything visual lives in app/styles (Agent B),
      which loads after this block and may override any of it. -->
@@ -97,8 +98,9 @@
 </main>
 
 <!-- MapLibre loads async so a slow CDN never blocks the login screen. -->
-<script async src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"
-        onload="window.dispatchEvent(new Event('maplibre:ready'))"></script>
+<script async src="vendor/maplibre-gl/maplibre-gl.js"
+        onload="window.dispatchEvent(new Event('maplibre:ready'))"
+        onerror="var s=document.createElement('script');s.src='https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js';s.onload=function(){window.dispatchEvent(new Event('maplibre:ready'))};document.head.appendChild(s)"></script>
 
 <script src="app/contract.js"></script>
 <script src="data/bundle.js"></script>

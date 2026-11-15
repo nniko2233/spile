@@ -10,7 +10,9 @@
   'use strict';
 
   const AF = SPILE.ANNUALIZATION;
-  const r1 = x => Math.round(x * 10) / 10;
+  // Same rounding as opt/make_plans.py: whole k€ from 10 ha up, 1 € below, so the
+  // 50 ha anchor table is exact and the smallest zones keep a non-zero threshold.
+  const rounder = areaHa => { const f = areaHa >= 10 ? 1 : 1000; return x => Math.floor(Math.round(x * f * 1e6) / 1e6 + 0.5) / f; };
 
   // id: [label, CAPEX k€/ha, OPEX k€/ha/yr, residual share of EAL]
   const SPEC = {
@@ -31,6 +33,7 @@
 
   /** ZonePlans for one zone, from its area and score. */
   function build(zoneId, areaHa, score) {
+    const r1 = rounder(areaHa);
     const eal = 0.9 * areaHa * (score / 0.7);
     const threshold = 0.30 * areaHa;
 
@@ -41,13 +44,14 @@
         id, label,
         capex_k: r1(capex), opex_k_yr: r1(opex), residual_k_yr: r1(residual),
         annualized_k_yr: r1(capex * AF + opex + residual),
-        acceptable: residual <= threshold, optimum: false,
+        acceptable: residual <= threshold + 1e-9, optimum: false, _ann: capex * AF + opex + residual,
         actions: ACTIONS[id],
       };
     });
 
-    const ok = plans.filter(p => p.acceptable).sort((a, b) => a.annualized_k_yr - b.annualized_k_yr);
+    const ok = plans.filter(p => p.acceptable).sort((a, b) => a._ann - b._ann);
     if (ok.length) ok[0].optimum = true;
+    plans.forEach(p => { delete p._ann; });
 
     return {
       zone_id: zoneId, area_ha: areaHa,

@@ -282,7 +282,8 @@ estimates, not derived from local time series. Say so if asked.
 
 ## Stack
 
-Vanilla JS, no framework, no build step. MapLibre GL JS from CDN. Terrain from
+Vanilla JS, no framework, no build step. MapLibre GL JS 4.7.1 vendored in
+`vendor/maplibre-gl/` (unpkg only as a fallback). Terrain from
 AWS Terrain Tiles (terrarium), passed through a `spdem://` protocol in
 `app/map/map.js` that sets every pixel outside the block to -140 m: that cut is
 what makes the slab. Tiles wholly outside the block are never fetched, and a
@@ -293,7 +294,17 @@ anywhere.
 
 Run it: `python -m http.server 8765` from the repo root, then open
 `http://localhost:8765/`. Keep the tab in the foreground: MapLibre suspends
-rendering in a background tab.
+rendering in a background tab. Serve it over http, not `file://`: from a file
+the plans come from the formula fixture instead of `data/plans.json` (same
+numbers, but not the file).
+
+Recording the video: `http://localhost:8765/?auto` plays all ten screens by
+itself, pressing what a presenter would press and waiting on the real screen
+changes (`?auto=fast` shortens the pauses; any key or click stops it). It runs
+about a minute on a laptop; cut it to the 45 s voice-over in the edit. The
+network is still needed for the terrain tiles and the lake (AWS, OpenFreeMap)
+and for the Outfit typeface; without it the block is flat and the type falls
+back to the system font.
 
 ```
 spile/
@@ -306,6 +317,7 @@ spile/
 │   ├── ui/             all screens and panels, owned by B
 │   └── styles/         CSS, owned by B
 ├── opt/                econ.py + make_plans.py, owned by B
+├── vendor/             MapLibre GL JS, vendored
 ├── data/               pipeline output, reused unchanged, plus plans.json
 ├── docs/specs/         the four UI spec files, reference only, owned by B
 └── pipeline/           Python pipeline, inherited, never re-run
@@ -486,3 +498,9 @@ Append-only. One line each: what was decided, why.
   three live maps: three WebGL contexts with terrain would stutter on a laptop.
 - **2026-11-15** Shell and index.html (A's files) extended by B for the above,
   on Kurt's instruction, A still stopped.
+- **2026-11-15** MapLibre vendored into the repo. A CDN is one blocked host away
+  from a dead map on stage.
+- **2026-11-15** `?auto` autoplay added for recording. It drives the real app,
+  it is not a second code path.
+- **2026-11-15** The plan fixture rounds like `make_plans.py` (whole k€ from
+  10 ha, 1 € below), so the anchor table is exact on `file://` too.
