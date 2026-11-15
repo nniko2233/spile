@@ -19,11 +19,11 @@ Order matters: do your tasks top to bottom.
 | id | task | status |
 |---|---|---|
 | B6 | `opt/econ.py` + `opt/make_plans.py` → `data/plans.json`, no solver. **Do this first.** | done |
-| B1 | login three-way split + login form | todo |
-| B2 | questionnaire, 3 of 12 | todo |
-| B3 | loading screen with the pi ring | todo |
-| B4 | area panel, four blocks, fed by the data layer | todo |
-| B5 | plans panel: swipe-down, split bars, threshold line, greyed rows, shimmer | todo |
+| B1 | login three-way split + login form | done |
+| B2 | questionnaire, 3 of 12 | done |
+| B3 | loading screen with the pi ring | done |
+| B4 | area panel, four blocks, fed by the data layer | done |
+| B5 | plans panel: swipe-down, split bars, threshold line, greyed rows, shimmer | done |
 | B7 | visual pass: typography, palette, motion, so it reads as cinematic | todo |
 
 ## Checkpoints

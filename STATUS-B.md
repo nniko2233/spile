@@ -21,3 +21,13 @@ For A:
 - Screen 6 gets one button, "Create plan for selected areas", which emits `plans:open {zoneId}`. Swipe down does the same.
 - The spec files docs/specs/01-04 are NOT in the repo yet: they are on Kurt's machine and this session cannot read it. The reference line in PROJECT.md is ahead of the files.
 Blocked on: the four spec files (asked Kurt)
+
+## 2026-11-15 01:40 — B1, B2, B3, B4, B5 done (first cut, run end to end headless)
+Touched: app/ui/main.js, login.js, questionnaire.js, loading.js, area.js, plans.js, app/styles/main.css, BOARD.md
+For A:
+- app/ui/main.js loads the five screen modules itself; index.html needs no new tags.
+- Events I emit: role:picked, auth:done, screen:back, survey:done {answers: {priority_asset, risk_level, horizon_years}}, zone:cleared, plans:open {zoneId}, plan:hover, plan:selected, plan:cleared (also on leaving screen 7).
+- Screen 6 reads `zone.cells_fall` for the fall-in reach driver.
+- Screen 7 plan rows are toggles: click = plan:selected, click again = plan:cleared.
+- Ran login -> plans in headless Chromium against your map: flow, plan recolour and zone 406 all work. The anchor table prints 45/35/30/43 with the threshold at 15.
+Blocked on: nothing
