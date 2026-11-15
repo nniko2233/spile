@@ -48,3 +48,8 @@ Blocked on: the four spec files docs/specs/01-04. They are on Kurt's machine; th
 Touched: app/map/map.js (colours only), app/styles/main.css, PROJECT.md
 For A: colours live in `C` at the top of map.js and in `:root` of main.css. Do not go back to dark or to near-white. Kurt and Niko are asleep for 6-7 hours and asked both of us to keep going: your open items are in REVIEW-B.md, then A6.
 Blocked on: spec files docs/specs/01-04 (still not in the repo)
+
+## 2026-11-15 — specs added (no board row)
+Touched: docs/specs/01-04 (new, unchanged copies)
+SPECS ADDED: docs/specs/. A: read 04 for the screen flow and pin rules.
+Blocked on: nothing
