@@ -19,7 +19,7 @@
   const E = SPILE.EVENTS, S = SPILE.SCREENS, bus = SPILE.bus, D = SPILE.data;
 
   const CELL_M = 20;
-  const OPACITY = { cells: 0.9, fill: 0.16, line: 0.72 };
+  const OPACITY = { cells: 0.84, fill: 0.16, line: 0.72 };
 
   const hexToRgb = hex => {
     const n = parseInt(hex.replace('#', ''), 16);
@@ -72,7 +72,7 @@
       paint: {
         'fill-extrusion-color': color,
         // k is 0..1, raised while a zone is hovered or selected.
-        'fill-extrusion-height': ['*', ['get', 'h'], ['+', 1, ['*', 0.85, ['to-number', ['feature-state', 'k']]]]],
+        'fill-extrusion-height': ['*', ['get', 'h'], ['+', 1, ['*', 1.3, ['to-number', ['feature-state', 'k']]]]],
         'fill-extrusion-base': 0,
         'fill-extrusion-vertical-gradient': true,
         'fill-extrusion-opacity': 0, 'fill-extrusion-opacity-transition': fade,

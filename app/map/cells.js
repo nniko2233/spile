@@ -36,9 +36,9 @@
 
   /** Pillar height of a zone, metres. Red zones stand clearly above amber ones. */
   function zoneHeight(p) {
-    if (p.cls === 'alto') return 16 + 44 * clamp01((p.score - 0.45) / 0.45);
-    if (p.cls === 'medio') return 7 + 9 * clamp01((p.score - 0.20) / 0.25);
-    return 5;
+    if (p.cls === 'alto') return 7 + 16 * clamp01((p.score - 0.45) / 0.45);
+    if (p.cls === 'medio') return 3 + 3 * clamp01((p.score - 0.20) / 0.25);
+    return 2.5;
   }
 
   SPILE.buildCells = (zonesFC, opts = {}) => {

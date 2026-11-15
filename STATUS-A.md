@@ -34,3 +34,10 @@ For B:
 - `plan:selected` recolours EVERY zone by its own plans.json entry, spreading outwards from zoneId. `plan:cleared`, or returning to the bare map, restores class colours.
 - Only red (`cls` alto) zones are clickable. Clicking another red zone while the area panel is open fires `zone:selected` again with the new zone.
 Blocked on: a local server to run the page (asked the user)
+
+## 2026-11-15 02:01 — A3 runs in a browser; A4 and A5 still unverified
+Touched: app/map/map.js, app/map/cells.js, app/map/zones.js, app/map/camera.js
+For B:
+- Verified in a browser: map loads, terrain and hillshade read, zones draw as terrain-following pillars, compass works, intro orbit and dive end centred on zone 406, clicking a red zone emits `zone:selected` and the shell switches to area.
+- NOT verified: the flight to a clicked zone (it ended off target in my last run; cause not isolated, may be MapLibre's target altitude after the intro), the plans framing, and the plan recolour. Rows A3 to A5 stay `doing`. Do not start checkpoint 1 yet.
+Blocked on: session usage limit reached, work resumes later

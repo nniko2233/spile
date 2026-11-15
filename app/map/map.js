@@ -45,10 +45,11 @@
       if (l.type === 'background') set(l, 'background-color', BG);
       else if (id === 'water') set(l, 'fill-color', '#08141f');
       else if (id === 'waterway') set(l, 'line-color', '#0b1c2b');
-      else if (id === 'landcover_wood') set(l, 'fill-color', '#0a1512');
+      else if (id === 'landcover_wood') { set(l, 'fill-color', '#0a1512'); if (l.paint) delete l.paint['fill-pattern']; }
       else if (id === 'landuse_park') set(l, 'fill-color', '#0a1411');
       else if (id === 'landuse_residential') set(l, 'fill-color', '#0d131b');
       else if (id === 'building') { set(l, 'fill-color', '#0e151e'); set(l, 'fill-outline-color', '#17212d'); }
+      else if (/^boundary_/.test(id)) l.layout = Object.assign({}, l.layout, { visibility: 'none' });
       else if (l.type === 'line' && /^(highway|road|railway)/.test(id)) {
         set(l, 'line-color', /casing/.test(id) ? '#1b2632' : '#141d27');
       } else if (l.type === 'symbol') {
@@ -105,11 +106,15 @@
       map.addLayer({
         id: 'sp-hillshade', type: 'hillshade', source: 'dem-shade',
         paint: {
-          'hillshade-exaggeration': 0.62,
-          'hillshade-illumination-direction': 315,
-          'hillshade-shadow-color': '#010306',
-          'hillshade-highlight-color': '#41586f',
-          'hillshade-accent-color': '#0a1622',
+          // Strong from afar, where it draws the valleys; softer up close, where a
+          // fully lit slope would wash out under the zones.
+          'hillshade-exaggeration': ['interpolate', ['linear'], ['zoom'], 12.2, 1, 14.2, 0.7],
+          // Anchored to the map so the light does not swing during the orbit.
+          'hillshade-illumination-anchor': 'map',
+          'hillshade-illumination-direction': 300,
+          'hillshade-shadow-color': '#000000',
+          'hillshade-highlight-color': '#d5e6f7',
+          'hillshade-accent-color': '#1a3047',
         },
       }, firstSymbol);
 

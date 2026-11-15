@@ -39,6 +39,34 @@
     return b;
   }
 
+  /**
+   * Camera options that really put a zone in the middle of the view.
+   *
+   * During a programmatic move MapLibre keeps the camera target at the altitude
+   * it had when the move started (transform.elevation), not at the altitude of
+   * the destination. Aiming at a zone's lon/lat therefore looks at a point above
+   * or below the hillside and the zone slides off screen. Two corrections, from
+   * the zone's own elevation: push the target along the bearing until the line
+   * of sight crosses the zone, and adjust the zoom so the zone is seen from the
+   * distance `view.zoom` means. (transform.elevation is read at each move.)
+   */
+  function lookAt(zone, view) {
+    const rad = Math.PI / 180;
+    const base = (map.transform && Number(map.transform.elevation)) || 0;
+    const E = (Number(zone.elev) || 0) * SPILE.map.EXAGGERATION - base; // metres above the target plane, as drawn
+    const th = view.pitch * rad, be = view.bearing * rad;
+    const shift = E * Math.tan(th);                                    // metres along the bearing
+    const center = [
+      zone.lon + shift * Math.sin(be) / (111320 * Math.cos(zone.lat * rad)),
+      zone.lat + shift * Math.cos(be) / 111320,
+    ];
+    const fov = (map.transform && map.transform._fov) || 0.6435;
+    const mPerPx = 40075016.686 * Math.cos(zone.lat * rad) / (512 * Math.pow(2, view.zoom));
+    const wanted = 0.5 * map.getContainer().clientHeight / Math.tan(fov / 2) * mPerPx; // camera to zone
+    const zoom = view.zoom - Math.log2(Math.max(0.25, 1 + E / (Math.cos(th) * wanted)));
+    return { center, zoom, pitch: view.pitch, bearing: view.bearing };
+  }
+
   /** Padding that keeps the zone clear of whatever panel the screen shows. */
   function paddingFor(screen) {
     if (screen === S.AREA) {
@@ -87,10 +115,8 @@
       if (mine !== token) return;
       if (!zone) { finishIntro(); return; }
       // 2. Dive onto the hillside of the demo zone, looking up the slope.
-      map.flyTo({
-        center: [zone.lon, zone.lat], zoom: 14.7, pitch: 66, bearing: upslope(zone),
-        duration: DIVE_MS, curve: 1.15, essential: true,
-      });
+      map.flyTo(Object.assign(lookAt(zone, { zoom: 14.3, pitch: 64, bearing: upslope(zone) }),
+        { duration: DIVE_MS, curve: 1.15, essential: true }));
       map.once('moveend', () => { if (mine === token) finishIntro(); });
     });
   }
@@ -100,11 +126,8 @@
   function flyToZone(zone, screen) {
     if (!map || !zone) return;
     token++;
-    map.flyTo({
-      center: [zone.lon, zone.lat],
-      zoom: Math.max(map.getZoom(), 15.1), pitch: 63, bearing: upslope(zone),
-      padding: paddingFor(screen), duration: 1700, curve: 1.2, essential: true,
-    });
+    map.flyTo(Object.assign(lookAt(zone, { zoom: 15.2, pitch: 62, bearing: upslope(zone) }),
+      { padding: paddingFor(screen), duration: 1700, curve: 1.2, essential: true }));
   }
 
   function onScreen(p) {
@@ -118,7 +141,7 @@
         else finishIntro();
       } else if (p.prev === S.AREA || p.prev === S.PLANS) {
         // Pull back a little so the hillside sits in its valley again.
-        map.easeTo({ padding: NO_PAD, zoom: Math.min(map.getZoom(), 14.4), pitch: 60, duration: 1500, essential: true });
+        map.easeTo({ padding: NO_PAD, zoom: map.getZoom() - 0.7, duration: 1500, essential: true });
       }
     } else if (p.screen === S.AREA) {
       if (introState !== 'done') skipIntro();
@@ -127,10 +150,8 @@
     } else if (p.screen === S.PLANS) {
       if (introState !== 'done') skipIntro();
       if (zone) {
-        map.easeTo({
-          center: [zone.lon, zone.lat], zoom: 14.9, pitch: 58,
-          padding: paddingFor(S.PLANS), duration: 1300, essential: true,
-        });
+        map.easeTo(Object.assign(lookAt(zone, { zoom: 15.0, pitch: 58, bearing: upslope(zone) }),
+          { padding: paddingFor(S.PLANS), duration: 1300, essential: true }));
       }
     }
   }
