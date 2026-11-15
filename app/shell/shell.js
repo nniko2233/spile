@@ -103,7 +103,7 @@
     const from = state.screen;
     if (from === S.LOGIN) { bus.emit(E.ROLE_PICKED, { role: state.stage }); return; }
     // On these the UI knows what the next beat is (toggle the plan, open the pop-up, save).
-    if (from === S.PLANS || from === S.OPERATOR || from === S.PROCUREMENT) { bus.emit(E.PRESENTER_NEXT, { screen: from }); return; }
+    if (from === S.QUESTIONNAIRE || from === S.PLANS || from === S.OPERATOR || from === S.PROCUREMENT) { bus.emit(E.PRESENTER_NEXT, { screen: from }); return; }
     if (from === S.FINAL) return;
     if (from === S.MAP || from === S.AREA && !state.zone) {
       // The only way into the area screen is a selected zone: pick the demo one.

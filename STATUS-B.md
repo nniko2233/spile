@@ -94,3 +94,12 @@ For A:
 - `?auto` plays the whole demo for the recording. Ran it headless to the final screen, no page errors, no CDN request.
 - Integration (your A6): I ran the full 10-screen flow three ways (clicks, PageDown only, ?auto). It holds. What is still rough: the intro timing on a real GPU (unseen), and file:// (fixture only). If you come back, that is what is left of A6.
 Blocked on: nothing
+
+## 2026-11-15 — Kurt's review, part 1: questionnaire on spec 01, loading ring, pin
+Touched: app/ui/questionnaire.js (rewritten), loading.js, area.js, auto.js, app/styles/main.css, app/shell/shell.js, app/map/zones.js, PROJECT.md
+For A:
+- Screen 3 is now Parts A to G of docs/specs/01. `survey:done {answers}` carries the whole answer set (sector, assets, b1, b2, importance by criterion id, matrix, target, aim, ...).
+- shell.js: PageDown on the questionnaire emits presenter:next instead of skipping to loading.
+- zones.js: pin body path only (head centred on the ring).
+SPEC CONFLICT (kept PROJECT.md): 01 A9 horizon 1/3/5 years, ours 20. 01 F2 yearly budget, omitted.
+Blocked on: nothing

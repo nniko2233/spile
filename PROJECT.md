@@ -74,13 +74,36 @@ utility) / Procurement. Hover highlights a column. The cursor picks Risk Manager
 ### 2. Login form
 Credentials and a sign-in button. Fake: any input is accepted.
 
-### 3. Profiling questionnaire
-Displays `3 of 12` so it reads as a longer form, but only three questions are
-answered, and these three drive the model:
+### 3. Risk manager questionnaire
+Built on `docs/specs/01-risk-manager-questionnaire.md`. The point of the screen
+is that the colours of the map come out of a framework, **risk = likelihood x
+consequence**, and not out of a preference. A rail on the left lists Parts A to
+G and what each one builds; the right pane is the part itself. Every part opens
+pre-filled from the sector template, so the demo is seven short screens.
 
-- Top priority asset to protect → **MV line + downstream settlement**
-- Acceptable risk level → **green (low)**
-- Planning horizon → **20 years**
+| Part | On screen | Builds |
+|---|---|---|
+| A Company and network | sector (five icon tiles), assets in scope (icon tiles), planning horizon, map unit | template and units |
+| B Domain weights | B1 three sliders and B2 five sliders, each sharing 100 points (moving one rebalances the others) | likelihood, consequence |
+| C Criteria | per domain: criterion, Low / Medium / High thresholds, importance 0 to 5, and the resulting weight | likelihood |
+| D Consequence calibration | the four levels per dimension, rerouting, peak months | consequence |
+| E Risk appetite | the ISA 4 x 4 matrix, each cell red, amber or green and editable; response days; the level every unit must reach after a plan | colour, acceptance threshold |
+| F Optimiser | the aim (one of three), blocked months, allowed actions | strategy, never colour |
+| G Check and sign-off | swing ranking computed from B and C, three real test zones, the hard rule, sign-off | consistency |
+
+Fixed answers that drive the model: assets **MV line + downstream settlement**,
+target after a plan **Low (green)**, horizon **20 years** (the spec offers 1, 3,
+5; ours is 20 because the annualization is over 20 years), aim **lowest expected
+cost of outages plus works**. Criterion weight shown in C and G is
+`domain points / 100 * importance / sum of importances in the domain`, as in the
+spec. **No yearly budget (spec F2): no budget control on any screen.**
+
+The answers are recorded (`SPILE.state.answers`) and screen 6 repeats the
+importance given to Fall-in reach. They do **not** re-score the map: the zones
+are precomputed by the pipeline. Say so if asked.
+
+Presenter: `PageDown` plays one gesture per part where there is one (A picks
+Distribution grid, B moves the points, C sets Fall-in reach to 5), then moves on.
 
 ### 4. Loading
 Animated logo, loading ring with the digits of pi scrolling along its edge.
@@ -210,7 +233,7 @@ or a control, this file wins.
 |---|---|---|---|
 | 1 Role picker | 1 Login split | yes | one accent per role, slogan as the only caption |
 | 2 Login | 2 Login form | yes | credentials fill themselves in |
-| 3 Questionnaire | 3 Questionnaire | yes | three questions, "3 of 12"; no points slider, no importance scores |
+| 3 Questionnaire | 3 Questionnaire | yes | Parts A to G of spec 01; the points sliders move and Fall-in reach goes to importance 5 |
 | 4 Loading | 4 Loading | yes | pi ring |
 | 5 Risk map | 5 3D map | yes | zones (not corridors) in red and amber; block shown tilted after a flat first beat |
 | 6 Area detail | 6 Area panel | yes | the four blocks of this file, not "area / flood / fire / fault"; fall-in reach count comes from the data (146), not 14 |
@@ -358,7 +381,8 @@ cover it and the camera pads itself to keep the zone in the visible part.
 
 Presenter safety net: `PageDown` advances one beat, `PageUp` and `Esc` step
 back, whatever the UI is doing. The whole demo can be driven with `PageDown`
-alone, 17 presses from the role picker to the three-role view: on screen 7 the
+alone, 26 presses from the role picker to the three-role view (10 of them in
+the questionnaire): on screen 7 the
 first press shows the optimum on the map and the second saves it; on screens 8
 and 9 the presses are question, pop-up, save (then, on 9, the three-role view). `?screen=<name>` jumps to a screen and `?dev`
 labels empty screens; both are development only.
@@ -504,3 +528,9 @@ Append-only. One line each: what was decided, why.
   it is not a second code path.
 - **2026-11-15** The plan fixture rounds like `make_plans.py` (whole k€ from
   10 ha, 1 € below), so the anchor table is exact on `file://` too.
+- **2026-11-15** (Kurt) Screen 3 rebuilt on spec 01, Parts A to G. The three
+  bare questions made "acceptable risk: green" look arbitrary; the colours now
+  come from the ISA matrix in Part E. Replaces the "3 of 12" form.
+- **2026-11-15** Loading ring rebuilt as HTML layers animated with transform and
+  opacity only. The SVG-internal animation stuttered while the map started up.
+- **2026-11-15** Pin head redrawn as a true circle on the centre the ring uses.

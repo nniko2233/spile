@@ -73,6 +73,12 @@
     };
   }
 
+  /** Screen 6 shows again the criterion the risk manager weighted in the questionnaire (C1.2). */
+  function importanceNote() {
+    const ans = SPILE.state.answers, imp = ans && ans.importance && ans.importance['C1.2'];
+    return imp ? `Fall-in reach · importance ${imp} of 5` : 'Fall-in reach';
+  }
+
   const block = (n, title, ...kids) =>
     h('section.block', null, h('header.block-head', null, h('span.block-n', { text: '0' + n }), h('h2', { text: title })), kids);
 
@@ -102,7 +108,7 @@
         h('div.risk-level', { 'data-cls': m.cls }, h('i.dot'), h('b', { text: m.level })),
         h('ul.risk-list', null, m.risks.map(t => h('li', { html: icon(RISK_LABEL[t][0]) + `<span>${RISK_LABEL[t][1]}</span>` }))),
         m.fall > 0 && h('div.driver', null,
-          h('span.driver-k', { text: 'Fall-in reach' }),
+          h('span.driver-k', { text: importanceNote() }),
           h('span.driver-v', null, h('b', { text: String(m.fall) }), ' trees taller than their distance to the line')),
         figure(k(m.zp.eal_k_yr), 'k€/yr', 'Expected annual loss')),
 

@@ -293,8 +293,10 @@
       if (share > 0) segs += arc(i, share, 'is-done' + (fill > before && before < i + share ? ' is-new' : ''));
     }
     return '<svg viewBox="0 0 46 58" aria-hidden="true">' +
-      '<path class="pin-body" d="M23 57 L11 38 A21 21 0 1 1 35 38 Z"/>' + segs +
-      '<text x="23" y="26">' + (PIN_LABEL[step - 1] || '') + '</text></svg>';
+      // Head: a true circle of radius 21 centred on (23, 23), the centre the ring
+      // and the label share. The tail leaves it at two points of that same circle.
+      '<path class="pin-body" d="M23 57 L11.54 40.6 A21 21 0 1 1 34.46 40.6 Z"/>' + segs +
+      '<text x="23" y="23" dominant-baseline="central">' + (PIN_LABEL[step - 1] || '') + '</text></svg>';
   }
 
   function setPin(zoneId, step) {

@@ -27,11 +27,12 @@
   async function run() {
     await until(on('login')); await sleep(2600); next();                       // 1 role picker
     await until(on('auth')); await sleep(2300); next();                        // 2 sign-in fills itself
-    await until(on('questionnaire')); await sleep(1200);                       // 3 three answers
-    click('.q-option:nth-child(1)'); await sleep(1300);
-    click('.q-option:nth-child(1)'); await sleep(1300);
-    click('.q-option:nth-child(3)'); await sleep(1700);
-    click('.q-summary .btn-primary');
+    await until(on('questionnaire')); await sleep(1400);                       // 3 Parts A to G
+    // A: pick the sector. B: move the points. C: fall-in reach to 5. Then D, E, F, G.
+    for (const pause of [1100, 1500, 1300, 2000, 1500, 2200, 1600, 2000, 1600, 2200]) {
+      if (SPILE.state.screen !== 'questionnaire') break;
+      next(); await sleep(pause);
+    }
     await until(on('map'), 40000);                                             // 4 loading, 5 map and intro
     await until(() => SPILE.state.introDone, 20000); await sleep(1600); next();
     await until(on('area')); await sleep(2600);                                // 6 area panel, read down
