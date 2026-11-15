@@ -39,6 +39,7 @@ SPILE.ROLES = Object.freeze({
 SPILE.EVENTS = Object.freeze({
   SCREEN_SHOW: 'screen:show',       // {screen}            shell -> ui
   ROLE_PICKED: 'role:picked',       // {role}              ui -> shell
+  AUTH_DONE: 'auth:done',           // {}                  ui -> shell  (sign-in accepted, go to questionnaire)
   SURVEY_DONE: 'survey:done',       // {answers}           ui -> shell
   MAP_READY: 'map:ready',           // {}                  map -> all
   INTRO_DONE: 'intro:done',         // {}                  map -> shell
@@ -48,6 +49,7 @@ SPILE.EVENTS = Object.freeze({
   PLAN_HOVER: 'plan:hover',         // {zoneId, planId}    ui -> map
   PLAN_SELECTED: 'plan:selected',   // {zoneId, planId}    ui -> map  (recolor)
   PLAN_CLEARED: 'plan:cleared',     // {}                  ui -> map
+  SCREEN_BACK: 'screen:back',       // {}                  ui -> shell  (plans -> area, area -> map, auth -> login)
 });
 
 /** Minimal event bus. Owned by A, used by both. */
